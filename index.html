@@ -34,7 +34,7 @@
     td input{width:100%;border:0;background:transparent;padding:8px 3px;text-align:center;min-width:0}td input:focus{outline:3px solid #1685c555;position:relative;background:#fff}.num{width:42px;text-align:center}td.num{cursor:pointer;background:#eaf5fb!important}td.num input{cursor:pointer;font-weight:700}.row-actions{width:38px;text-align:center}.remove{border:0;background:transparent;color:var(--danger);font-size:1.1rem;padding:6px}.edit-hint{font-size:.74rem;color:#49616f;background:#fff;border-radius:999px;padding:4px 8px}
     .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:12px}.primary{background:var(--ok);color:#fff}.secondary{background:#e7f1f6;color:var(--navy)}.danger{background:#fff0ef;color:var(--danger)}
 .vh-input{position:fixed!important;top:0;right:0;width:1px!important;height:1px!important;opacity:0;pointer-events:none;overflow:hidden;clip-path:inset(50%)}
-    .ocr-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.ocr-bar #extractBtn{background:#6d28d9;grid-column:1/-1}.ocr-bar #convertBtn{grid-column:1/-1}.ocr-bar .btn.busy{opacity:.7;pointer-events:none}#convertBtn.pulse{animation:pulse 1s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px #15734733}}
+    .ocr-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.ocr-bar #extractBtn{background:#6d28d9;grid-column:1/-1}.ocr-bar #convertBtn{grid-column:1/-1}.ocr-opt{grid-column:1/-1;display:flex!important;align-items:center;gap:6px;margin:2px 0!important;font-size:.85rem;font-weight:700;color:var(--navy)}.ocr-opt input{width:18px;height:18px}.ocr-bar .btn.busy{opacity:.7;pointer-events:none}#convertBtn.pulse{animation:pulse 1s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px #15734733}}
     .auto-state{font-size:.8rem;color:var(--muted);margin-right:auto}.auto-state.ok{color:var(--ok)}.auto-state.err{color:var(--danger)}
     .ai-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px;align-items:end;margin:0 0 12px;padding:10px;border:1px solid #e6c865;background:#fff9db;border-radius:12px}.ai-tools label{margin:0}.ai-tools input{margin-top:5px;background:#fff}#apiKey{display:block;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:400}.key-remember input{width:auto;margin:0}.ai-note{grid-column:1/-1;color:#6f5b13;font-size:.78rem}.ai-results{display:none;grid-column:1/-1;background:#fff;border:1px solid #e6c865;border-radius:9px;padding:9px;line-height:1.7}.ai-results.show{display:block}.ai-results ul{margin:5px 0 0;padding-right:20px}.ai-checking{opacity:.65;pointer-events:none}tbody td.ai-diff{background:#ffe36e!important;box-shadow:inset 0 0 0 3px #d97706}tbody td.ai-low{background:#fff4bd!important;box-shadow:inset 0 0 0 2px #e9b949}
     aside{padding:12px;display:flex;flex-direction:column;min-height:0}.aside-title{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px}.aside-title h2{font-size:1rem;margin:0}.count{background:var(--sky);color:var(--navy);border-radius:999px;padding:3px 9px;font-weight:700}
@@ -146,7 +146,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-09-28</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-09-29 (3)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -159,6 +159,7 @@
           <button class="btn secondary" id="camBtn" type="button">📷 تصوير</button>
           <button class="btn secondary" id="galBtn" type="button">🖼️ من المعرض</button>
           <button class="btn primary" id="extractBtn" type="button">✨ استخراج النص من الصورة</button>
+          <label class="ocr-opt"><input type="checkbox" id="skipNoPlate" checked> تجاهل السيارات «بدون لوحات» عند التحويل</label>
           <button class="btn primary" id="convertBtn" type="button">تحويل إلى جدول</button>
         </div>
         <input id="camInput" type="file" accept="image/*" capture="environment" class="vh-input">
@@ -397,8 +398,17 @@ function convertText(){
   const res=parseTable(text);
   if(!res||!res.rows.length)return toast('لم أجد جدولًا في النص؛ تأكد من وجود | أو Tab بين الأعمدة');
   if(hasEdits()&&!confirm('التحويل سيستبدل الجدول الحالي وتضيع التعديلات التي عليه. متابعة؟'))return;
-  loadRows(res.rows,res.headers);markDirty();
-  toast(`✅ تم تحويل ${res.rows.length} صف`+(res.fixed?` (تم تصحيح أعمدة ${res.fixed} صف — راجعها)`:''));
+  let skipped=0;
+  if($('#skipNoPlate')?.checked){
+    const pc=res.headers.findIndex(h=>/لوح/.test(h));
+    if(pc>=0){let prev='';const DITTO=/^[\s\/\\"'″“”〃״=\-]*$/;
+      res.rows=res.rows.filter(r=>{let v=String(r[pc]??'').trim();
+        if(v&&DITTO.test(v))v=prev;else if(v)prev=v;
+        const none=/بدون/.test(v);if(none)skipped++;return !none});}
+  }
+  if(!res.rows.length)return toast('كل الصفوف «بدون لوحات» — لا يوجد ما يُحوَّل (ألغِ خيار التجاهل إن أردت)',5000);
+  loadRows(res.rows,res.headers);markDirty();const nd=markDoubts();
+  toast(`✅ تم تحويل ${res.rows.length} صف`+(nd?` · ${nd} خانة مشكوك فيها بالأصفر — راجعها`:'')+(skipped?` · تم تجاهل ${skipped} سيارة بدون لوحات`:'')+(res.fixed?` (تم تصحيح أعمدة ${res.fixed} صف — راجعها)`:''),5000);
 }
 
 /* ===== النافذة المنبثقة — نسخة محصّنة بالكامل ===== */
@@ -510,8 +520,9 @@ function bandFromCalib(c,i){
   return null;
 }
 function rowNum(i){const raw=String($('#tbody').rows[i]?.cells[0]?.querySelector('input')?.value??'').trim();return /^[0-9٠-٩۰-۹]{1,3}$/.test(raw)?raw:String(i+1)}
+function imgIdx(i){const raw=String($('#tbody').rows[i]?.cells[0]?.querySelector('input')?.value??'').trim();const v=toLatinNum(raw);return /^[0-9٠-٩۰-۹]{1,3}$/.test(raw)&&+v>0?+v-1:i}
 function rowBand(i){
-  const n=$('#tbody').rows.length||1,c=activeCalib(),b=bandFromCalib(c,i);
+  const n=$('#tbody').rows.length||1,c=activeCalib(),b=bandFromCalib(c,imgIdx(i));
   if(b)return{...b,exact:!!recCalib,auto:!!c.lines};
   return{c:(i+.5)/n,h:1/n,angle:0,exact:false,none:true};
 }
@@ -873,7 +884,8 @@ async function cropRow(r,ri,cache){
   const im=cache.get(r.id);if(!im)return '';
   let c=r.calib;
   if(!c){const k=r.image.length+':'+r.image.slice(-64);if(!lineCache.has(k)){try{lineCache.set(k,detectTableLines(im,(r.rows||[]).length))}catch(e){lineCache.set(k,null)}}c=lineCache.get(k)||globalCalib()}
-  const bb=bandFromCalib(c,ri);if(!bb)return '';
+  const rn=String(r.rows?.[ri]?.[0]??'').trim(),rnv=toLatinNum(rn);
+  const bb=bandFromCalib(c,/^[0-9٠-٩۰-۹]{1,3}$/.test(rn)&&+rnv>0?+rnv-1:ri);if(!bb)return '';
   const ctr=bb.c,h=bb.h*1.5;
   const y0=Math.max(0,(ctr-h/2)*im.naturalHeight),hh=Math.min(im.naturalHeight-y0,h*im.naturalHeight);
   if(hh<=2)return '';
@@ -1373,6 +1385,31 @@ function cleanOcrText(txt){
   if(first>=0&&!lines[first].includes('|')&&lines[first].trim().length<=40){title=lines[first].replace(/^(رقم المحضر|المحضر|العنوان)\s*[:：]\s*/,'').trim();}
   return{text:t,title};
 }
+let ocrDoubts=null;
+const rowKey=r=>{const raw=String(r?.[0]??'').trim(),v=toLatinNum(raw);return /^[0-9٠-٩۰-۹]{1,3}$/.test(raw)?+v:null};
+/* مقارنة قراءتين: الخانات المختلفة = مشكوك فيها */
+function compareReadings(t1,t2){
+  const A=parseTable(t1),B=parseTable(t2);if(!A||!B)return [];
+  const bMap=new Map(B.rows.map((r,i)=>[rowKey(r)??('i'+i),r]));
+  const colMap=A.headers.map(h=>{const j=B.headers.findIndex(x=>norm(x)===norm(h));return j});
+  const out=[];
+  A.rows.forEach((r,i)=>{const k=rowKey(r)??('i'+i),o=bMap.get(k);
+    r.forEach((v,c)=>{if(c===0)return;const j=colMap[c]>=0?colMap[c]:c;const w=o?String(o[j]??''):'';
+      if(!o||norm(fixLook(v))!==norm(fixLook(w)))out.push({row:k,col:A.headers[c],alt:o?w:'(الصف غير موجود في القراءة الثانية)'})});
+  });
+  return out;
+}
+function markDoubts(){
+  if(!ocrDoubts||!ocrDoubts.list.length)return 0;
+  if($('#sourceText').value!==ocrDoubts.text)return 0;
+  let n=0;const rows=[...$('#tbody').rows];
+  for(const d of ocrDoubts.list){
+    const c=currentHeaders.findIndex(h=>h===d.col);if(c<0)continue;
+    const tr=rows.find((tr,i)=>{const raw=tr.cells[0]?.querySelector('input')?.value;return (typeof d.row==='number')?rowKey([raw])===d.row:('i'+i)===d.row});
+    const td=tr?.cells[c];if(!td)continue;td.classList.add('ai-low');td.title='قراءة ثانية: '+(d.alt||'(فارغ)');n++;
+  }
+  return n;
+}
 async function extractText(){
   if(!imageData)return toast('صوّر المحضر أو أرفق صورة أولًا');
   const key=$('#apiKey').value.trim();
@@ -1381,19 +1418,28 @@ async function extractText(){
   const btn=$('#extractBtn'),old=btn.textContent;btn.textContent='⏳ جارٍ القراءة… (قد تأخذ 20–60 ثانية)';btn.classList.add('busy');
   try{
     const src=(ocrSrc&&ocrSrc.forImage===imageData)?ocrSrc.hi:imageData;
-    const r=isGemini(key)?await geminiText(key,OCR_PROMPT,[src]):await openaiText(key,OCR_PROMPT,[src]);
+    /* قراءتان مستقلتان في نفس الوقت — للمقارنة وكشف الخانات المشكوك فيها */
+    const call=pr=>isGemini(key)?geminiText(key,pr,[src]):openaiText(key,pr,[src]);
+    const [a1,a2]=await Promise.allSettled([call(OCR_PROMPT),call(OCR_PROMPT+'\nاقرأ كل خانة بتأنٍّ حرفًا حرفًا ورقمًا رقمًا قبل كتابتها.')]);
+    const ok=[a1,a2].filter(x=>x.status==='fulfilled').map(x=>x.value);
+    if(!ok.length)throw (a1.reason||a2.reason);
+    const r=ok[0];
     const {text,title}=cleanOcrText(r.txt);
     if(!text.includes('|'))throw new Error('لم يرجع جدولًا — جرّب صورة أوضح');
+    ocrDoubts=null;
+    if(ok[1]){try{ocrDoubts={text,list:compareReadings(text,cleanOcrText(ok[1].txt).text)}}catch(_){}}
     $('#sourceText').value=text;markDirty();
     if(title&&!$('#title').value.trim()){$('#title').value=title;markDirty()}
     $('#sourceText').scrollIntoView({behavior:'smooth',block:'center'});
     const cb=$('#convertBtn');cb.classList.remove('pulse');void cb.offsetWidth;cb.classList.add('pulse');
     const n=(text.match(/^\s*\|/gm)||[]).length-2;
-    toast(`✅ تم الاستخراج (${Math.max(n,0)} صف) بنموذج ${r.model} — راجع النص ثم اضغط «تحويل إلى جدول»`,6000);
+    const nd=ocrDoubts?.list.length||0;
+    toast(`✅ تم الاستخراج (${Math.max(n,0)} صف) بنموذج ${r.model}`+(ocrDoubts?(nd?` — ${nd} خانة اختلفت فيها القراءتان وستظهر بالأصفر`:' — القراءتان متطابقتان ✔'):'')+' — اضغط «تحويل إلى جدول»',7000);
   }catch(e){toast('⚠️ تعذر الاستخراج: '+e.message,7000)}
   finally{btn.textContent=old;btn.classList.remove('busy')}
 }
 $('#extractBtn').onclick=extractText;
+(function(){const k='imageTableEditorSkipNoPlate',v=lsGet(k);if(v!=null)$('#skipNoPlate').checked=v==='1';$('#skipNoPlate').onchange=()=>lsSet(k,$('#skipNoPlate').checked?'1':'0')})();
 $('#convertBtn').onclick=convertText;$('#compareBtn').onclick=compareWithAI;$('#zoomIn').onclick=()=>{zoom=Math.min(3,zoom+.2);applyZoom()};$('#zoomOut').onclick=()=>{zoom=Math.max(.4,zoom-.2);applyZoom()};
 $('#addRow').onclick=()=>{addRow(currentHeaders.map((_,i)=>i===0?String($('#tbody').rows.length+1):''));markDirty()};
 $('#saveBtn').onclick=()=>save(true);$('#updateBtn').onclick=()=>save(false);

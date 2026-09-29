@@ -34,6 +34,10 @@
     td input{width:100%;border:0;background:transparent;padding:8px 3px;text-align:center;min-width:0}td input:focus{outline:3px solid #1685c555;position:relative;background:#fff}.num{width:42px;text-align:center}td.num{cursor:pointer;background:#eaf5fb!important}td.num input{cursor:pointer;font-weight:700}.row-actions{width:38px;text-align:center}.remove{border:0;background:transparent;color:var(--danger);font-size:1.1rem;padding:6px}.edit-hint{font-size:.74rem;color:#49616f;background:#fff;border-radius:999px;padding:4px 8px}
     .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:12px}.primary{background:var(--ok);color:#fff}.secondary{background:#e7f1f6;color:var(--navy)}.danger{background:#fff0ef;color:var(--danger)}
 .vh-input{position:fixed!important;top:0;right:0;width:1px!important;height:1px!important;opacity:0;pointer-events:none;overflow:hidden;clip-path:inset(50%)}
+    .queue-bar{border:2px solid #6d28d9;background:#f5f0ff;border-radius:12px;padding:8px 10px;margin:0 0 10px;display:grid;gap:6px}.queue-bar[hidden]{display:none}
+    .q-info{font-weight:700;color:#4c1d95;font-size:.9rem}.q-info span{font-weight:400;font-size:.8rem;color:#6b5a8e;margin-right:6px}
+    .q-btns{display:flex;gap:6px;flex-wrap:wrap}.q-btns [hidden]{display:none!important}.q-btns .btn{padding:7px 10px;font-size:.8rem}
+    .q-thumbs{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}.q-thumbs img{height:46px;border-radius:5px;border:2px solid transparent;flex-shrink:0}.q-thumbs img.cur{border-color:#6d28d9}.q-thumbs img.ready{box-shadow:0 0 0 2px #16a34a}
     .ocr-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.ocr-bar #extractBtn{background:#6d28d9;grid-column:1/-1}.ocr-bar #convertBtn{grid-column:1/-1}.ocr-opt{grid-column:1/-1;display:flex!important;align-items:center;gap:6px;margin:2px 0!important;font-size:.85rem;font-weight:700;color:var(--navy)}.ocr-opt input{width:18px;height:18px}.ocr-bar .btn.busy{opacity:.7;pointer-events:none}#convertBtn.pulse{animation:pulse 1s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px #15734733}}
     .auto-state{font-size:.8rem;color:var(--muted);margin-right:auto}.auto-state.ok{color:var(--ok)}.auto-state.err{color:var(--danger)}
     .ai-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px;align-items:end;margin:0 0 12px;padding:10px;border:1px solid #e6c865;background:#fff9db;border-radius:12px}.ai-tools label{margin:0}.ai-tools input{margin-top:5px;background:#fff}#apiKey{display:block;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:400}.key-remember input{width:auto;margin:0}.ai-note{grid-column:1/-1;color:#6f5b13;font-size:.78rem}.ai-results{display:none;grid-column:1/-1;background:#fff;border:1px solid #e6c865;border-radius:9px;padding:9px;line-height:1.7}.ai-results.show{display:block}.ai-results ul{margin:5px 0 0;padding-right:20px}.ai-checking{opacity:.65;pointer-events:none}tbody td.ai-diff{background:#ffe36e!important;box-shadow:inset 0 0 0 3px #d97706}tbody td.ai-low{background:#fff4bd!important;box-shadow:inset 0 0 0 2px #e9b949}
@@ -146,7 +150,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-09-29 (3)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-09-29 (4)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -157,19 +161,24 @@
         <div><label for="title">اسم السجل</label><input id="title" class="field" type="text" placeholder="مثال: S1-161"></div>
         <div><label for="sourceText">النص المراد تحويله</label><textarea id="sourceText" placeholder="الصق النص كاملًا هنا، ثم اضغط تحويل إلى جدول…"></textarea><div class="ocr-bar">
           <button class="btn secondary" id="camBtn" type="button">📷 تصوير</button>
-          <button class="btn secondary" id="galBtn" type="button">🖼️ من المعرض</button>
+          <button class="btn secondary" id="galBtn" type="button">🖼️ من المعرض (صورة أو عدة صور)</button>
           <button class="btn primary" id="extractBtn" type="button">✨ استخراج النص من الصورة</button>
           <label class="ocr-opt"><input type="checkbox" id="skipNoPlate" checked> تجاهل السيارات «بدون لوحات» عند التحويل</label>
           <button class="btn primary" id="convertBtn" type="button">تحويل إلى جدول</button>
         </div>
         <input id="camInput" type="file" accept="image/*" capture="environment" class="vh-input">
-        <input id="galInput" type="file" accept="image/*" class="vh-input"></div>
+        <input id="galInput" type="file" accept="image/*" multiple class="vh-input"></div>
       </div>
       <div class="ai-tools" id="aiTools">
         <label>مفتاح الذكاء الاصطناعي — Gemini مجاني (AIza… أو AQ.…) أو OpenAI (sk-…)<input id="apiKey" type="password" autocomplete="off" placeholder="مفتاح Gemini أو sk-…"><span class="key-remember"><input type="checkbox" id="rememberKey"> تذكّر المفتاح في هذا الجهاز</span></label>
         <button class="btn secondary" id="compareBtn" style="font-size:.75rem;padding:6px 10px">🔎 مقارنة الجدول بالصورة (اختياري)</button>
         <div class="ai-note">هذا المفتاح يستخدمه زر «✨ استخراج النص من الصورة». زر المقارنة اختياري ولا تحتاجه للاستخراج.</div>
         <div class="ai-results" id="aiResults"></div>
+      </div>
+      <div class="queue-bar" id="queueBar" hidden>
+        <div class="q-info">📚 <b id="qPos"></b> <span id="qNext"></span></div>
+        <div class="q-btns"><button class="btn primary" id="qStart" hidden>▶ متابعة القائمة</button><button class="btn secondary" id="qSkip">⏭ تخطي</button><button class="btn secondary" id="qDrop">🗑 حذف الصورة</button><button class="btn danger" id="qEnd">✕ إنهاء القائمة</button></div>
+        <div class="q-thumbs" id="qThumbs"></div>
       </div>
       <div class="split">
         <section class="image-panel">
@@ -249,7 +258,8 @@ window.addEventListener('error',e=>{try{toast('⚠️ خطأ: '+(e.message||'غ�
 
 const DEFAULT_HEADERS=['م','نوع السيارة','اللون','رقم اللوحة','الحالة'];let currentHeaders=[...DEFAULT_HEADERS];
 const $=s=>document.querySelector(s);let currentId=null,imageData='',zoom=1,records=[];
-const DRAFT_ID='__draft__',LAST_KEY='imageTableEditorLastId';
+const DRAFT_ID='__draft__',QUEUE_ID='__queue__',LAST_KEY='imageTableEditorLastId';
+const isSys=id=>String(id||'').startsWith('__');
 const dbp=new Promise((resolve,reject)=>{const q=indexedDB.open('imageTableEditorDB',1);q.onupgradeneeded=()=>q.result.createObjectStore('records',{keyPath:'id'});q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error)});
 
 /* ===== التخزين الذكي: IndexedDB ← localStorage ← الذاكرة ===== */
@@ -661,7 +671,7 @@ function hasData(){const rows=tableRows();return !!($('#title').value.trim()||$(
 function buildRecord(){
   const title=$('#title').value.trim();
   const old=records.find(r=>r.id===currentId);
-  return{id:currentId||crypto.randomUUID(),title:title||old?.title||`سجل ${new Date().toLocaleDateString('ar-SA')}`,rawTitle:$('#title').value,sourceText:$('#sourceText').value,image:imageData,headers:[...currentHeaders],rows:tableRows().filter(r=>r.some(Boolean)),marks:collectMarks(),calib:recCalib,created:old?.created||Date.now(),imgRead:(old&&old.image===imageData)?old.imgRead:undefined,updated:Date.now()};
+  return{id:currentId||crypto.randomUUID(),title:title||old?.title||`سجل ${new Date().toLocaleDateString('ar-SA')}`,rawTitle:$('#title').value,sourceText:$('#sourceText').value,image:imageData,headers:[...currentHeaders],rows:tableRows().filter(r=>r.some(Boolean)),marks:collectMarks(),calib:recCalib,created:old?.created||Date.now(),imgRead:(old&&old.image===imageData)?old.imgRead:undefined,imgSig:(curSig&&curSig.src===imageData)?curSig.s:(old&&old.image===imageData)?old.imgSig:undefined,updated:Date.now()};
 }
 async function autoSave(){
   clearTimeout(autoTimer);if(!dirty)return;dirty=false;
@@ -678,8 +688,8 @@ async function autoSave(){
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autoSave()});
 window.addEventListener('pagehide',()=>autoSave());
 
-function fillForm(r,title){recCalib=r.calib||null;hitRow=-1;setTimeout(()=>{if(!recCalib)autoCalibrate()},50);$('#title').value=title??'';$('#sourceText').value=r.sourceText||'';loadRows(r.rows,r.headers);applyMarks(r.marks);showImage(r.image||'')}
-function newRecord(){recCalib=null;hitRow=-1;clearTimeout(autoTimer);dirty=false;currentId=null;lsSet(LAST_KEY,null);$('#title').value='';$('#sourceText').value='';loadRows([],DEFAULT_HEADERS);showImage('');$('#deleteBtn').hidden=true;$('#imageInput').value='';setAutoState('');renderRecords();window.scrollTo({top:0,behavior:'smooth'})}
+function fillForm(r,title){curSig=r.image?{src:r.image,s:r.imgSig}:null;recCalib=r.calib||null;hitRow=-1;setTimeout(()=>{if(!recCalib)autoCalibrate()},50);$('#title').value=title??'';$('#sourceText').value=r.sourceText||'';loadRows(r.rows,r.headers);applyMarks(r.marks);showImage(r.image||'')}
+function newRecord(){queueCur=null;recCalib=null;hitRow=-1;clearTimeout(autoTimer);dirty=false;currentId=null;lsSet(LAST_KEY,null);$('#title').value='';$('#sourceText').value='';loadRows([],DEFAULT_HEADERS);showImage('');$('#deleteBtn').hidden=true;$('#imageInput').value='';setAutoState('');renderRecords();window.scrollTo({top:0,behavior:'smooth'})}
 async function openRecord(id){
   if(dirty)await autoSave();
   const r=records.find(x=>x.id===id);if(!r)return;
@@ -687,7 +697,7 @@ async function openRecord(id){
   fillForm(r,r.title||'');
   $('#deleteBtn').hidden=false;setAutoState('');renderRecords();
 }
-async function refresh(){records=(await all()).filter(r=>r.id!==DRAFT_ID);renderRecords()}
+async function refresh(){records=(await all()).filter(r=>!isSys(r.id));renderRecords()}
 /* ===== بحث اللوحات: الأرقام + الحروف بأي ترتيب، عربي أو إنجليزي ===== */
 const EN_PLATE={a:'ا',b:'ب',j:'ح',d:'د',r:'ر',s:'س',x:'ص',t:'ط',e:'ع',g:'ق',k:'ك',l:'ل',z:'م',n:'ن',h:'ه',u:'و',v:'ي'};
 /* أحرف تشبه الأرقام في قراءة الخط اليدوي: ه/o بجانب رقم = ٥ ، نقطة بجانب رقم = ٠ */
@@ -957,7 +967,7 @@ $('#printImageBtn').onclick=()=>{
 /* ===== نسخة احتياطية / استيراد ===== */
 $('#exportBtn').onclick=async()=>{
   await autoSave();
-  const data=(await all()).filter(r=>r.id!==DRAFT_ID);
+  const data=(await all()).filter(r=>!isSys(r.id));
   const blob=new Blob([JSON.stringify({app:'imageTableEditor',version:2,exported:Date.now(),records:data},null,1)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`نسخة-احتياطية-${new Date().toISOString().slice(0,10)}.json`;a.click();
@@ -972,7 +982,7 @@ $('#importInput').onchange=async e=>{
     const arr=Array.isArray(data)?data:data.records;
     if(!Array.isArray(arr))throw new Error('ملف غير صالح');
     let n=0;
-    for(const r of arr){if(r&&r.id&&r.id!==DRAFT_ID&&Array.isArray(r.rows)){await put(r);n++}}
+    for(const r of arr){if(r&&r.id&&!isSys(r.id)&&Array.isArray(r.rows)){await put(r);n++}}
     await refresh();toast(`تم استيراد ${n} سجلًا`);
   }catch(err){toast('تعذر الاستيراد: '+err.message)}
   e.target.value='';
@@ -1027,7 +1037,7 @@ async function exportExcel(){
   const btn=$('#excelBtn'),old=btn.textContent;btn.textContent='⏳ جارٍ التصدير…';btn.disabled=true;
   try{
     await autoSave();
-    const recs=(await all()).filter(r=>r.id!==DRAFT_ID).sort((a,b)=>a.updated-b.updated);
+    const recs=(await all()).filter(r=>!isSys(r.id)).sort((a,b)=>a.updated-b.updated);
     if(!recs.length)return toast('لا توجد سجلات للتصدير');
     const used=new Set(['الكل']);
     const sheetName=t=>{let base=String(t||'سجل').replace(/[\[\]:*?\/\\']/g,'-').trim().slice(0,26)||'سجل',n=base,i=2;while(used.has(n.toLowerCase()))n=base.slice(0,24)+' ('+(i++)+')';used.add(n.toLowerCase());return n};
@@ -1057,7 +1067,7 @@ $('#excelBtn').onclick=exportExcel;
 /* ===== حذف كل السجلات دفعة واحدة (مع نسخة احتياطية وتأكيد) ===== */
 $('#deleteAllBtn').onclick=async()=>{
   await autoSave().catch(()=>{});
-  const all_=(await all()).filter(r=>r.id!==DRAFT_ID);
+  const all_=(await all()).filter(r=>!isSys(r.id));
   if(!all_.length)return toast('لا توجد سجلات');
   if(!confirm(`سيتم حذف كل السجلات (${all_.length} سجل) نهائيًا من هذا الجهاز.\n\nهل تريد المتابعة؟`))return;
   if(confirm('ننصح بتنزيل نسخة احتياطية أولًا حتى تستطيع استرجاعها.\n\nاضغط «موافق» لتنزيل النسخة الآن، أو «إلغاء» للحذف بدونها.')){
@@ -1297,7 +1307,7 @@ async function save(startNew=false){
   await del(DRAFT_ID).catch(()=>{});
   await refresh();
   toast('✅ تم الحفظ — التعديلات صارت رمادية');
-  if(startNew)newRecord();else{$('#deleteBtn').hidden=false;setAutoState('saved')}
+  if(startNew){if(queueCur&&await queueAfterSave())return;queueCur=null;newRecord()}else{$('#deleteBtn').hidden=false;setAutoState('saved')}
 }
 /* ===== تحميل صورة (مع تصغيرها لتوفير المساحة) ===== */
 function fileToDataURL(file,max=2200,q=.85){
@@ -1320,6 +1330,9 @@ async function useImageFile(f,{extract}={}){
   try{
     toast('⏳ جارٍ تجهيز الصورة…',2000);
     const data=await fileToDataURL(f);
+    const sig=await imgSig(data).catch(()=>null);
+    if(!(await checkNotDuplicate(sig)))return;
+    curSig={src:data,s:sig};
     ocrSrc={forImage:data,hi:f.size<7e6?await readRaw(f).catch(()=>data):await fileToDataURL(f,4000,.95).catch(()=>data)};
     recCalib=null;showImage(data);markDirty();setTimeout(()=>autoCalibrate(),50);
     if(extract)extractText();
@@ -1339,7 +1352,7 @@ async function pickForNewPhoto(input){
 $('#camBtn').onclick=()=>pickForNewPhoto($('#camInput'));
 $('#galBtn').onclick=()=>pickForNewPhoto($('#galInput'));
 $('#camInput').onchange=e=>useImageFile(e.target.files[0],{extract:true});
-$('#galInput').onchange=e=>useImageFile(e.target.files[0],{extract:true});
+$('#galInput').onchange=e=>{const fs=[...e.target.files];if(fs.length>1)addToQueue(fs);else useImageFile(fs[0],{extract:true})};
 
 /* ===== استخراج النص من الصورة بالذكاء الاصطناعي ===== */
 /* ===== استخراج النص — بنفس طريقة تطبيق Gemini: الصورة الأصلية + طلب بسيط + رد كجدول ===== */
@@ -1410,34 +1423,155 @@ function markDoubts(){
   }
   return n;
 }
+/* قراءة صورة واحدة (قراءتان مستقلتان للمقارنة) — لا تغيّر الصفحة */
+async function ocrCore(src,key){
+  const call=pr=>isGemini(key)?geminiText(key,pr,[src]):openaiText(key,pr,[src]);
+  const [a1,a2]=await Promise.allSettled([call(OCR_PROMPT),call(OCR_PROMPT+'\nاقرأ كل خانة بتأنٍّ حرفًا حرفًا ورقمًا رقمًا قبل كتابتها.')]);
+  const ok=[a1,a2].filter(x=>x.status==='fulfilled').map(x=>x.value);
+  if(!ok.length)throw (a1.reason||a2.reason);
+  const {text,title}=cleanOcrText(ok[0].txt);
+  if(!text.includes('|'))throw new Error('لم يرجع جدولًا — جرّب صورة أوضح');
+  let doubts=null;if(ok[1]){try{doubts=compareReadings(text,cleanOcrText(ok[1].txt).text)}catch(_){}}
+  return{text,title,doubts,model:ok[0].model};
+}
+function applyOcr(r){
+  $('#sourceText').value=r.text;markDirty();
+  ocrDoubts=r.doubts?{text:r.text,list:r.doubts}:null;
+  if(r.title&&!$('#title').value.trim()){$('#title').value=r.title;markDirty()}
+  $('#sourceText').scrollIntoView({behavior:'smooth',block:'center'});
+  const cb=$('#convertBtn');cb.classList.remove('pulse');void cb.offsetWidth;cb.classList.add('pulse');
+  const n=(r.text.match(/^\s*\|/gm)||[]).length-2,nd=r.doubts?.length||0;
+  toast(`✅ تم الاستخراج (${Math.max(n,0)} صف) بنموذج ${r.model}`+(r.doubts?(nd?` — ${nd} خانة اختلفت فيها القراءتان وستظهر بالأصفر`:' — القراءتان متطابقتان ✔'):'')+' — اضغط «تحويل إلى جدول»',7000);
+}
+function needKey(){
+  const key=$('#apiKey').value.trim();
+  if(!key){toast('أدخل مفتاح Gemini أو OpenAI في المربع الأصفر أولًا',5000);$('#apiKey').scrollIntoView({behavior:'smooth',block:'center'});$('#apiKey').focus()}
+  return key;
+}
+function setExtractBusy(on){const btn=$('#extractBtn');if(on){btn.dataset.old=btn.dataset.old||btn.textContent;btn.textContent='⏳ جارٍ القراءة… (قد تأخذ 20–60 ثانية)';btn.classList.add('busy')}else{if(btn.dataset.old)btn.textContent=btn.dataset.old;delete btn.dataset.old;btn.classList.remove('busy')}}
 async function extractText(){
   if(!imageData)return toast('صوّر المحضر أو أرفق صورة أولًا');
-  const key=$('#apiKey').value.trim();
-  if(!key){toast('أدخل مفتاح Gemini أو OpenAI في المربع الأصفر أولًا',5000);$('#apiKey').scrollIntoView({behavior:'smooth',block:'center'});$('#apiKey').focus();return}
+  const key=needKey();if(!key)return;
   if($('#sourceText').value.trim()&&!confirm('خانة النص فيها كتابة — استبدالها بالنص المستخرج؟'))return;
-  const btn=$('#extractBtn'),old=btn.textContent;btn.textContent='⏳ جارٍ القراءة… (قد تأخذ 20–60 ثانية)';btn.classList.add('busy');
+  setExtractBusy(true);
   try{
     const src=(ocrSrc&&ocrSrc.forImage===imageData)?ocrSrc.hi:imageData;
-    /* قراءتان مستقلتان في نفس الوقت — للمقارنة وكشف الخانات المشكوك فيها */
-    const call=pr=>isGemini(key)?geminiText(key,pr,[src]):openaiText(key,pr,[src]);
-    const [a1,a2]=await Promise.allSettled([call(OCR_PROMPT),call(OCR_PROMPT+'\nاقرأ كل خانة بتأنٍّ حرفًا حرفًا ورقمًا رقمًا قبل كتابتها.')]);
-    const ok=[a1,a2].filter(x=>x.status==='fulfilled').map(x=>x.value);
-    if(!ok.length)throw (a1.reason||a2.reason);
-    const r=ok[0];
-    const {text,title}=cleanOcrText(r.txt);
-    if(!text.includes('|'))throw new Error('لم يرجع جدولًا — جرّب صورة أوضح');
-    ocrDoubts=null;
-    if(ok[1]){try{ocrDoubts={text,list:compareReadings(text,cleanOcrText(ok[1].txt).text)}}catch(_){}}
-    $('#sourceText').value=text;markDirty();
-    if(title&&!$('#title').value.trim()){$('#title').value=title;markDirty()}
-    $('#sourceText').scrollIntoView({behavior:'smooth',block:'center'});
-    const cb=$('#convertBtn');cb.classList.remove('pulse');void cb.offsetWidth;cb.classList.add('pulse');
-    const n=(text.match(/^\s*\|/gm)||[]).length-2;
-    const nd=ocrDoubts?.list.length||0;
-    toast(`✅ تم الاستخراج (${Math.max(n,0)} صف) بنموذج ${r.model}`+(ocrDoubts?(nd?` — ${nd} خانة اختلفت فيها القراءتان وستظهر بالأصفر`:' — القراءتان متطابقتان ✔'):'')+' — اضغط «تحويل إلى جدول»',7000);
+    applyOcr(await ocrCore(src,key));
   }catch(e){toast('⚠️ تعذر الاستخراج: '+e.message,7000)}
-  finally{btn.textContent=old;btn.classList.remove('busy')}
+  finally{setExtractBusy(false)}
 }
+
+/* ===== بصمة الصورة: لمنع إدخال صورة لها سجل محفوظ ===== */
+async function imgSig(src){
+  const im=await loadImg(src);if(!im)return null;const N=48;
+  const a=document.createElement('canvas');a.width=a.height=N*4;const ac=a.getContext('2d');ac.imageSmoothingQuality='high';ac.drawImage(im,0,0,N*4,N*4);
+  const cv=document.createElement('canvas');cv.width=cv.height=N;const c=cv.getContext('2d');c.imageSmoothingQuality='high';c.drawImage(a,0,0,N,N);
+  const d=c.getImageData(0,0,N,N).data,v=new Float32Array(N*N);let m=0;
+  for(let i=0,k=0;i<d.length;i+=4,k++){v[k]=d[i]*.3+d[i+1]*.59+d[i+2]*.11;m+=v[k]}m/=v.length;
+  let sd=0;for(const x of v)sd+=(x-m)**2;sd=Math.sqrt(sd/v.length)||1;
+  let bin='';for(const x of v){const q=Math.max(-127,Math.min(127,Math.round((x-m)/sd*30)));bin+=String.fromCharCode(q&255)}
+  return btoa(bin);
+}
+function sigArr(s){const b=atob(s),a=new Int8Array(b.length);for(let i=0;i<b.length;i++)a[i]=(b.charCodeAt(i)<<24)>>24;return a}
+function sigCorr(s1,s2){if(!s1||!s2)return 0;const a=sigArr(s1),b=sigArr(s2);if(a.length!==b.length)return 0;let ab=0,aa=0,bb=0;for(let i=0;i<a.length;i++){ab+=a[i]*b[i];aa+=a[i]*a[i];bb+=b[i]*b[i]}return ab/Math.sqrt(aa*bb||1)}
+const SIG_SAME=.9,SIG_SIMILAR=.6;
+let curSig=null; /* بصمة صورة السجل الحالي */
+async function recordSig(r){
+  if(r.imgSig)return r.imgSig;if(!r.image)return null;
+  const sg=await imgSig(r.image).catch(()=>null);if(!sg)return null;
+  r.imgSig=sg;try{const fresh=(await all()).find(x=>x.id===r.id);if(fresh&&fresh.image===r.image)await put({...fresh,imgSig:sg})}catch(_){}
+  return sg;
+}
+async function findDuplicate(sig,excludeId){
+  let best=null;
+  for(const r of records){if(!r.image||r.id===excludeId)continue;const c=sigCorr(sig,await recordSig(r));if(!best||c>best.c)best={r,c}}
+  return best;
+}
+/* يرجع true إذا يُسمح بالصورة */
+async function checkNotDuplicate(sig){
+  if(!sig||!records.some(r=>r.image))return true;
+  const d=await findDuplicate(sig,currentId);if(!d)return true;
+  if(d.c>=SIG_SAME){
+    if(confirm(`⛔ هذه الصورة محفوظة من قبل في السجل «${d.r.title||'بدون اسم'}» (📅 ${fmtDay(recordDate(d.r))}) — لن تُضاف.\n\nهل تريد فتح ذلك السجل؟`))openRecord(d.r.id);
+    return false;
+  }
+  if(d.c>=SIG_SIMILAR)return confirm(`⚠️ هذه الصورة تشبه صورة السجل «${d.r.title||'بدون اسم'}» (تشابه ${Math.round(d.c*100)}%) — قد تكون نفس المحضر مصوّرًا مرة ثانية.\n\nهل تريد إضافتها رغم ذلك؟`);
+  return true;
+}
+async function precomputeSigs(){for(const r of records){if(r.image&&!r.imgSig){await recordSig(r);await new Promise(x=>setTimeout(x,120))}}}
+
+/* ===== قائمة صور متعددة: صورة ← استخراج ← تعديل ← حفظ ← التالية ===== */
+let queue=[],queueCur=null;
+function dataURLResize(src,max=2200,q=.85){return loadImg(src).then(im=>{if(!im)return src;const sc=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));if(sc>=1)return src;const cv=document.createElement('canvas');cv.width=Math.round(im.naturalWidth*sc);cv.height=Math.round(im.naturalHeight*sc);const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.drawImage(im,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',q)})}
+async function saveQueue(){try{if(queue.length)await put({id:QUEUE_ID,title:'',rows:[],updated:0,items:queue.map(({hi,sig,text,title,doubts,model})=>({hi,sig,text,title,doubts,model}))});else await del(QUEUE_ID)}catch(e){toast('⚠️ تعذر حفظ قائمة الصور: '+e.message)}}
+function renderQueue(){
+  const bar=$('#queueBar');bar.hidden=!queue.length;if(!queue.length){updateSaveLabel();return}
+  const i=queueCur?queue.indexOf(queueCur):-1;
+  $('#qPos').textContent=queueCur?`صورة ${i+1} من ${queue.length} في القائمة`:`لديك ${queue.length} صورة في القائمة`;
+  const nx=queueCur?queue[i+1]:queue[0];
+  $('#qNext').textContent=nx?(nx.text?'· التالية جاهزة ✓':nx.reading?'· جارٍ قراءة التالية…':''):'· هذه آخر صورة';
+  $('#qStart').hidden=!!queueCur;$('#qSkip').hidden=$('#qDrop').hidden=!queueCur;
+  $('#qThumbs').innerHTML=queue.map((it,k)=>`<img src="${it.thumb||it.hi}" class="${it===queueCur?'cur':''} ${it.text?'ready':''}" data-k="${k}" alt="">`).join('');
+  $('#qThumbs').querySelectorAll('img').forEach(im=>im.onclick=()=>{const it=queue[+im.dataset.k];if(it!==queueCur)openQueueItem(it)});
+  updateSaveLabel();
+}
+function updateSaveLabel(){
+  const b=$('#saveBtn');
+  if(queueCur){const left=queue.length-1;b.textContent=left?`💾 حفظ والانتقال للصورة التالية (${left} متبقية)`:'💾 حفظ (آخر صورة في القائمة)'}
+  else b.textContent='حفظ وفتح سجل جديد';
+}
+function readQueueItem(it){
+  const key=$('#apiKey').value.trim();if(!key||it.text||it.reading)return it.reading||null;
+  it.reading=ocrCore(it.hi,key).then(r=>{Object.assign(it,r);it.reading=null;saveQueue();renderQueue();return r})
+    .catch(e=>{it.reading=null;it.err=e.message;renderQueue();throw e});
+  renderQueue();return it.reading;
+}
+function prefetchNext(){const i=queue.indexOf(queueCur),nx=queue[i+1];if(nx&&!nx.text&&!nx.reading&&!nx.err)readQueueItem(nx).catch(()=>{})}
+async function openQueueItem(it){
+  if(!it)return;
+  if(currentId&&dirty)await autoSave();
+  newRecord();queueCur=it;renderQueue();
+  const data=await dataURLResize(it.hi);
+  if(!it.sig)it.sig=await imgSig(it.hi).catch(()=>null);curSig={src:data,s:it.sig};
+  ocrSrc={forImage:data,hi:it.hi};recCalib=null;showImage(data);setTimeout(()=>autoCalibrate(),50);
+  renderQueue();window.scrollTo({top:0,behavior:'smooth'});
+  if(it.text){applyOcr(it);prefetchNext();return}
+  if(!$('#apiKey').value.trim()){toast('أدخل المفتاح ثم اضغط «✨ استخراج النص»',5000);return}
+  setExtractBusy(true);
+  try{const r=await (it.reading||readQueueItem(it));if(queueCur===it)applyOcr(r)}
+  catch(e){if(queueCur===it)toast('⚠️ تعذر الاستخراج: '+e.message+' — اضغط «✨ استخراج النص» للمحاولة مرة ثانية',7000);it.err=null}
+  finally{if(queueCur===it)setExtractBusy(false)}
+  prefetchNext();
+}
+async function addToQueue(files){
+  toast(`⏳ تجهيز ${files.length} صور…`,3000);
+  const items=[];
+  let dupSaved=0,dupQueue=0;
+  for(const f of files){try{
+    const hi=await fileToDataURL(f,3200,.9),sig=await imgSig(hi).catch(()=>null);
+    if(sig){
+      const d=await findDuplicate(sig,null);if(d&&d.c>=SIG_SAME){dupSaved++;continue}
+      if([...queue,...items].some(it=>it.sig&&sigCorr(sig,it.sig)>=SIG_SAME)){dupQueue++;continue}
+    }
+    items.push({hi,sig,thumb:await dataURLResize(hi,160,.6)});
+  }catch(e){}}
+  if(dupSaved||dupQueue)toast(`⛔ تم تجاهل ${dupSaved+dupQueue} صورة مكررة`+(dupSaved?` (${dupSaved} لها سجل محفوظ)`:'')+(dupQueue?` (${dupQueue} مكررة في القائمة)`:''),6000);
+  if(!items.length)return dupSaved||dupQueue?null:toast('تعذر قراءة الصور');
+  queue.push(...items);await saveQueue();
+  if(!(dupSaved||dupQueue))toast(`📚 أُضيفت ${items.length} صور للقائمة`,3000);
+  if(!queueCur)openQueueItem(queue[0]);else renderQueue();
+}
+/* بعد الحفظ: احذف الصورة من القائمة وافتح التالية */
+async function queueAfterSave(){
+  const i=queue.indexOf(queueCur);if(i<0)return false;
+  queue.splice(i,1);const next=queue[i]||queue[0]||null;queueCur=null;await saveQueue();
+  if(next){openQueueItem(next);return true}
+  renderQueue();toast('🎉 انتهت كل الصور في القائمة',5000);return false;
+}
+$('#qStart').onclick=()=>openQueueItem(queue[0]);
+$('#qSkip').onclick=()=>{const i=queue.indexOf(queueCur);if(queue.length<2)return toast('لا توجد صورة أخرى');openQueueItem(queue[(i+1)%queue.length])};
+$('#qDrop').onclick=async()=>{if(!confirm('حذف هذه الصورة من القائمة بدون حفظها كسجل؟'))return;const i=queue.indexOf(queueCur);queue.splice(i,1);queueCur=null;await saveQueue();newRecord();if(queue.length)openQueueItem(queue[Math.min(i,queue.length-1)]);else{renderQueue();toast('انتهت القائمة')}};
+$('#qEnd').onclick=async()=>{if(!confirm(`إنهاء القائمة وحذف ${queue.length} صورة غير محفوظة منها؟ (السجلات المحفوظة لا تتأثر)`))return;queue=[];queueCur=null;await saveQueue();renderQueue();toast('تم إنهاء القائمة')};
 $('#extractBtn').onclick=extractText;
 (function(){const k='imageTableEditorSkipNoPlate',v=lsGet(k);if(v!=null)$('#skipNoPlate').checked=v==='1';$('#skipNoPlate').onchange=()=>lsSet(k,$('#skipNoPlate').checked?'1':'0')})();
 $('#convertBtn').onclick=convertText;$('#compareBtn').onclick=compareWithAI;$('#zoomIn').onclick=()=>{zoom=Math.min(3,zoom+.2);applyZoom()};$('#zoomOut').onclick=()=>{zoom=Math.max(.4,zoom-.2);applyZoom()};
@@ -1446,7 +1580,7 @@ $('#saveBtn').onclick=()=>save(true);$('#updateBtn').onclick=()=>save(false);
 $('#newBtn').onclick=async()=>{
   if(!currentId&&hasData()&&!confirm('البيانات الحالية لم تُحفظ كسجل. فتح سجل جديد سيحذفها. متابعة؟'))return;
   if(currentId)await autoSave();else await del(DRAFT_ID).catch(()=>{});
-  newRecord();
+  newRecord();renderQueue();
 };
 $('#search').oninput=renderRecords;
 $('#dateFrom').onchange=renderRecords;$('#dateTo').onchange=renderRecords;$('#dateClear').onclick=()=>{$('#dateFrom').value='';$('#dateTo').value='';renderRecords()};
@@ -1478,8 +1612,11 @@ $('#tbody').addEventListener('focusout',e=>{
 });
 $('#deleteBtn').onclick=async()=>{if(!currentId||!confirm('هل تريد حذف هذا السجل؟'))return;clearTimeout(autoTimer);dirty=false;await del(currentId);await refresh();newRecord();toast('تم حذف السجل')};
 
+/* ===== استرجاع قائمة الصور المحفوظة ===== */
+async function loadQueue(){try{const q=(await all()).find(r=>r.id===QUEUE_ID);if(q&&Array.isArray(q.items)&&q.items.length){queue=q.items;for(const it of queue)if(!it.thumb)it.thumb=await dataURLResize(it.hi,160,.6);renderQueue()}}catch(e){}}
 /* ===== عند فتح الصفحة: يرجع آخر سجل كنت تعمل عليه بتعديلاته، أو المسودة ===== */
 initStorage().then(()=>refresh()).then(async()=>{
+  loadQueue();setTimeout(()=>precomputeSigs().catch(()=>{}),4000);
   const last=lsGet(LAST_KEY);
   if(last&&records.some(r=>r.id===last)){await openRecord(last);toast('تم فتح آخر سجل مع تعديلاته');return}
   newRecord();

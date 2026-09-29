@@ -33,6 +33,8 @@
     tbody td.changed{background:#fff0a8!important;box-shadow:inset 0 0 0 2px #e6a700}
     td input{width:100%;border:0;background:transparent;padding:8px 3px;text-align:center;min-width:0}td input:focus{outline:3px solid #1685c555;position:relative;background:#fff}.num{width:42px;text-align:center}td.num{cursor:pointer;background:#eaf5fb!important}td.num input{cursor:pointer;font-weight:700}.row-actions{width:38px;text-align:center}.remove{border:0;background:transparent;color:var(--danger);font-size:1.1rem;padding:6px}.edit-hint{font-size:.74rem;color:#49616f;background:#fff;border-radius:999px;padding:4px 8px}
     .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:12px}.primary{background:var(--ok);color:#fff}.secondary{background:#e7f1f6;color:var(--navy)}.danger{background:#fff0ef;color:var(--danger)}
+.vh-input{position:fixed!important;top:0;right:0;width:1px!important;height:1px!important;opacity:0;pointer-events:none;overflow:hidden;clip-path:inset(50%)}
+    .ocr-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.ocr-bar #extractBtn{background:#6d28d9;grid-column:1/-1}.ocr-bar #convertBtn{grid-column:1/-1}.ocr-bar .btn.busy{opacity:.7;pointer-events:none}#convertBtn.pulse{animation:pulse 1s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px #15734733}}
     .auto-state{font-size:.8rem;color:var(--muted);margin-right:auto}.auto-state.ok{color:var(--ok)}.auto-state.err{color:var(--danger)}
     .ai-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px;align-items:end;margin:0 0 12px;padding:10px;border:1px solid #e6c865;background:#fff9db;border-radius:12px}.ai-tools label{margin:0}.ai-tools input{margin-top:5px;background:#fff}#apiKey{display:block;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:400}.key-remember input{width:auto;margin:0}.ai-note{grid-column:1/-1;color:#6f5b13;font-size:.78rem}.ai-results{display:none;grid-column:1/-1;background:#fff;border:1px solid #e6c865;border-radius:9px;padding:9px;line-height:1.7}.ai-results.show{display:block}.ai-results ul{margin:5px 0 0;padding-right:20px}.ai-checking{opacity:.65;pointer-events:none}tbody td.ai-diff{background:#ffe36e!important;box-shadow:inset 0 0 0 3px #d97706}tbody td.ai-low{background:#fff4bd!important;box-shadow:inset 0 0 0 2px #e9b949}
     aside{padding:12px;display:flex;flex-direction:column;min-height:0}.aside-title{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px}.aside-title h2{font-size:1rem;margin:0}.count{background:var(--sky);color:var(--navy);border-radius:999px;padding:3px 9px;font-weight:700}
@@ -153,10 +155,17 @@
     <section class="workspace card">
       <div class="top-fields">
         <div><label for="title">اسم السجل</label><input id="title" class="field" type="text" placeholder="مثال: S1-161"></div>
-        <div><label for="sourceText">النص المراد تحويله</label><textarea id="sourceText" placeholder="الصق النص كاملًا هنا، ثم اضغط تحويل إلى جدول…"></textarea><button class="btn primary" id="convertBtn" style="margin-top:8px">تحويل إلى جدول</button></div>
+        <div><label for="sourceText">النص المراد تحويله</label><textarea id="sourceText" placeholder="الصق النص كاملًا هنا، ثم اضغط تحويل إلى جدول…"></textarea><div class="ocr-bar">
+          <button class="btn secondary" id="camBtn" type="button">📷 تصوير</button>
+          <button class="btn secondary" id="galBtn" type="button">🖼️ من المعرض</button>
+          <button class="btn primary" id="extractBtn" type="button">✨ استخراج النص من الصورة</button>
+          <button class="btn primary" id="convertBtn" type="button">تحويل إلى جدول</button>
+        </div>
+        <input id="camInput" type="file" accept="image/*" capture="environment" class="vh-input">
+        <input id="galInput" type="file" accept="image/*" class="vh-input"></div>
       </div>
       <div class="ai-tools" id="aiTools">
-        <label>مفتاح الذكاء الاصطناعي — Gemini مجاني (AIza…) أو OpenAI (sk-…)<input id="apiKey" type="password" autocomplete="off" placeholder="AIza… أو sk-…"><span class="key-remember"><input type="checkbox" id="rememberKey"> تذكّر المفتاح في هذا الجهاز</span></label>
+        <label>مفتاح الذكاء الاصطناعي — Gemini مجاني (AIza… أو AQ.…) أو OpenAI (sk-…)<input id="apiKey" type="password" autocomplete="off" placeholder="مفتاح Gemini أو sk-…"><span class="key-remember"><input type="checkbox" id="rememberKey"> تذكّر المفتاح في هذا الجهاز</span></label>
         <button class="btn primary" id="compareBtn">فحص الاختلافات</button>
         <div class="ai-note">يُرسل الجدول والصورة للفحص عند ضغط الزر فقط. راجع النتائج لأن قراءة الخط اليدوي قد تخطئ.</div>
         <div class="ai-results" id="aiResults"></div>
@@ -182,7 +191,7 @@
       <div class="backup-bar">
         <button class="btn secondary" id="exportBtn" title="تنزيل نسخة احتياطية من كل السجلات">⬇️ نسخة احتياطية</button>
         <button class="btn primary" id="excelBtn" title="تصدير كل الجداول إلى Excel — كل سجل في ورقة">📊 تصدير Excel</button>
-        <button class="btn secondary" id="importBtn" type="button">⬆️ استيراد</button><input id="importInput" type="file" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px">
+        <button class="btn secondary" id="importBtn" type="button">⬆️ استيراد</button><input id="importInput" type="file" class="vh-input">
       </div>
       <button class="btn danger" id="deleteAllBtn" style="width:100%;margin-top:6px;font-size:.8rem">🗑️ حذف كل السجلات</button>
       <div class="date-filter"><span>📅 تاريخ السجل</span><label>من <input type="date" id="dateFrom"></label><label>إلى <input type="date" id="dateTo"></label><button class="btn secondary" id="dateClear" title="إلغاء فلتر التاريخ">✕</button></div>
@@ -1209,14 +1218,15 @@ function updateIndexBtn(){
   $('#indexBtn').textContent=`🖼️ قراءة الصور للبحث (${done}/${withImg.length})`;
 }
 const PLATE_PROMPT='هذه صورة محضر جرد سيارات مكتوب بخط اليد فيه جدول مرقّم (م). اقرأ عمود «رقم اللوحة» لكل صف بدقة، حرفًا حرفًا ورقمًا رقمًا، واكتبه كما هو في الصورة (الحروف ثم الأرقام). انتبه للأرقام المتشابهة في الخط اليدوي مثل ٢ و٣، ٧ و٨، ٦ و٤، ٠ و٥، ١ و٩. إذا كان أي رقم أو حرف غير واضح فضع في alternatives كل القراءات المحتملة الأخرى للوحة كاملة. تجاهل الصفوف الفارغة وصفوف (بدون) و(م د م) وعلامات التكرار (//). رقم الصف row هو الرقم في عمود م.';
-const isGemini=k=>/^AIza/.test(k);
+/* مفاتيح OpenAI تبدأ بـ sk- ، وأي مفتاح آخر (AIza… أو AQ.… الجديدة) = Google Gemini */
+const isGemini=k=>!/^sk-/.test(String(k).trim());
 const GEMINI_MODELS=['gemini-2.5-flash','gemini-3-flash-preview','gemini-2.0-flash'];let geminiModelIdx=0;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function geminiJSON(key,prompt,imageDataUrl,schema){
   const m=/^data:([^;]+);base64,(.*)$/.exec(imageDataUrl||'');if(!m)throw new Error('صورة غير صالحة');
   for(;geminiModelIdx<GEMINI_MODELS.length;geminiModelIdx++){
     const model=GEMINI_MODELS[geminiModelIdx];
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:m[1],data:m[2]}}]}],generationConfig:{temperature:0,responseMimeType:'application/json',responseSchema:schema}})});
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:m[1],data:m[2]}}]}],generationConfig:{temperature:0,responseMimeType:'application/json',responseSchema:schema}})});
     const data=await res.json().catch(()=>({}));
     if(res.status===404)continue; /* النموذج غير متاح — جرّب التالي */
     if(!res.ok){const e=new Error(data.error?.message||`خطأ ${res.status}`);e.status=res.status;throw e}
@@ -1277,7 +1287,83 @@ async function save(startNew=false){
   toast('✅ تم الحفظ — التعديلات صارت رمادية');
   if(startNew)newRecord();else{$('#deleteBtn').hidden=false;setAutoState('saved')}
 }
-$('#imageInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{recCalib=null;showImage(rd.result);markDirty();setTimeout(()=>autoCalibrate(),50)};rd.readAsDataURL(f)};
+/* ===== تحميل صورة (مع تصغيرها لتوفير المساحة) ===== */
+function fileToDataURL(file,max=2200,q=.85){
+  return new Promise((res,rej)=>{
+    const rd=new FileReader();rd.onerror=()=>rej(new Error('تعذر قراءة الصورة'));
+    rd.onload=()=>{const im=new Image();im.onerror=()=>res(rd.result);im.onload=()=>{
+      const sc=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));
+      if(sc>=1&&file.size<1.5e6)return res(rd.result);
+      const cv=document.createElement('canvas');cv.width=Math.round(im.naturalWidth*sc);cv.height=Math.round(im.naturalHeight*sc);
+      const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.drawImage(im,0,0,cv.width,cv.height);
+      res(cv.toDataURL('image/jpeg',q));
+    };im.src=rd.result};
+    rd.readAsDataURL(file);
+  });
+}
+async function useImageFile(f,{extract}={}){
+  if(!f)return;
+  try{
+    toast('⏳ جارٍ تجهيز الصورة…',2000);
+    const data=await fileToDataURL(f);
+    recCalib=null;showImage(data);markDirty();setTimeout(()=>autoCalibrate(),50);
+    if(extract)extractText();
+  }catch(e){toast('⚠️ '+e.message)}
+}
+$('#imageInput').onchange=e=>{useImageFile(e.target.files[0]);e.target.value=''};
+async function pickForNewPhoto(input){
+  /* السجل الحالي فيه بيانات؟ افتح سجلًا جديدًا للصورة الجديدة */
+  if(hasData()&&(currentId||tableRows().some(r=>r.slice(1).some(Boolean)))){
+    if(confirm('هل تريد فتح سجل جديد لهذه الصورة؟\n\n«موافق» = سجل جديد (السجل الحالي محفوظ)\n«إلغاء» = استبدال صورة السجل الحالي')){
+      if(currentId)await autoSave();else if(!confirm('البيانات الحالية لم تُحفظ كسجل وستُحذف. متابعة؟'))return;
+      newRecord();
+    }
+  }
+  input.value='';input.click();
+}
+$('#camBtn').onclick=()=>pickForNewPhoto($('#camInput'));
+$('#galBtn').onclick=()=>pickForNewPhoto($('#galInput'));
+$('#camInput').onchange=e=>useImageFile(e.target.files[0],{extract:true});
+$('#galInput').onchange=e=>useImageFile(e.target.files[0],{extract:true});
+
+/* ===== استخراج النص من الصورة بالذكاء الاصطناعي ===== */
+const OCR_PROMPT='هذه صورة محضر/جدول (غالبًا محضر جرد سيارات مكتوب بخط اليد أو مطبوع). استخرج الجدول كاملًا بدقة عالية:\n- headers: عناوين الأعمدة كما هي مكتوبة في الصورة بالترتيب من اليمين لليسار.\n- rows: كل صف فيه كتابة، خلية خلية بنفس ترتيب العناوين. اكتب النص حرفيًا كما في الصورة (الأرقام الهندية تبقى هندية)، وأبقِ علامات التكرار (// أو ") كما هي، واترك الخلية الفارغة "".\n- تجاهل الصفوف الفارغة تمامًا في آخر الجدول.\n- انتبه للأرقام المتشابهة في الخط اليدوي (٢ و٣، ٧ و٨، ٠ و٥) وحروف اللوحات.\n- title: رقم أو اسم المحضر المكتوب أعلى الصفحة (مثل S1-163) إن وجد، وإلا "".';
+function tableToText(t){
+  const clean=v=>String(v??'').replace(/\|/g,'/').replace(/\s+/g,' ').trim();
+  const H=(t.headers||[]).map(clean);const w=Math.max(H.length,...(t.rows||[]).map(r=>r.length));
+  while(H.length<w)H.push('العمود '+(H.length+1));
+  const lines=[];if(t.title)lines.push(clean(t.title),'');
+  lines.push('| '+H.join(' | ')+' |','|'+H.map(()=>'---').join('|')+'|');
+  for(const r of (t.rows||[])){const c=[...r];while(c.length<w)c.push('');if(c.some(x=>clean(x)))lines.push('| '+c.map(clean).join(' | ')+' |')}
+  return lines.join('\n');
+}
+async function extractText(){
+  if(!imageData)return toast('صوّر المحضر أو أرفق صورة أولًا');
+  const key=$('#apiKey').value.trim();
+  if(!key){toast('أدخل مفتاح OpenAI (sk-…) أو Gemini (AIza…) في المربع الأصفر أولًا',5000);$('#apiKey').scrollIntoView({behavior:'smooth',block:'center'});$('#apiKey').focus();return}
+  if($('#sourceText').value.trim()&&!confirm('خانة النص فيها كتابة — استبدالها بالنص المستخرج؟'))return;
+  const btn=$('#extractBtn'),old=btn.textContent;btn.textContent='⏳ جارٍ القراءة… (قد تأخذ 20–40 ثانية)';btn.classList.add('busy');
+  try{
+    let t;
+    if(isGemini(key)){
+      const gs={type:'OBJECT',properties:{title:{type:'STRING'},headers:{type:'ARRAY',items:{type:'STRING'}},rows:{type:'ARRAY',items:{type:'ARRAY',items:{type:'STRING'}}}},required:['title','headers','rows']};
+      t=await geminiJSON(key,OCR_PROMPT,imageData,gs);
+    }else{
+      const schema={type:'object',additionalProperties:false,properties:{title:{type:'string'},headers:{type:'array',items:{type:'string'}},rows:{type:'array',items:{type:'array',items:{type:'string'}}}},required:['title','headers','rows']};
+      const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',store:false,input:[{role:'user',content:[{type:'input_text',text:OCR_PROMPT},{type:'input_image',image_url:imageData,detail:'high'}]}],text:{format:{type:'json_schema',name:'table_ocr',strict:true,schema}},max_output_tokens:4000})});
+      const data=await res.json();if(!res.ok)throw new Error(data.error?.message||`خطأ ${res.status}`);
+      t=JSON.parse(responseText(data));
+    }
+    if(!t||!(t.rows||[]).length)throw new Error('لم أجد جدولًا في الصورة — جرّب صورة أوضح ومستقيمة');
+    $('#sourceText').value=tableToText(t);markDirty();
+    if(t.title&&!$('#title').value.trim()){$('#title').value=t.title.trim();markDirty()}
+    $('#sourceText').scrollIntoView({behavior:'smooth',block:'center'});
+    const cb=$('#convertBtn');cb.classList.remove('pulse');void cb.offsetWidth;cb.classList.add('pulse');
+    toast(`✅ تم استخراج ${t.rows.length} صف — راجع النص ثم اضغط «تحويل إلى جدول»`,5000);
+  }catch(e){toast('⚠️ تعذر الاستخراج: '+e.message,6000)}
+  finally{btn.textContent=old;btn.classList.remove('busy')}
+}
+$('#extractBtn').onclick=extractText;
 $('#convertBtn').onclick=convertText;$('#compareBtn').onclick=compareWithAI;$('#zoomIn').onclick=()=>{zoom=Math.min(3,zoom+.2);applyZoom()};$('#zoomOut').onclick=()=>{zoom=Math.max(.4,zoom-.2);applyZoom()};
 $('#addRow').onclick=()=>{addRow(currentHeaders.map((_,i)=>i===0?String($('#tbody').rows.length+1):''));markDirty()};
 $('#saveBtn').onclick=()=>save(true);$('#updateBtn').onclick=()=>save(false);

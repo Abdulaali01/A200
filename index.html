@@ -184,6 +184,7 @@
         <button class="btn primary" id="excelBtn" title="تصدير كل الجداول إلى Excel — كل سجل في ورقة">📊 تصدير Excel</button>
         <button class="btn secondary" id="importBtn" type="button">⬆️ استيراد</button><input id="importInput" type="file" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px">
       </div>
+      <button class="btn danger" id="deleteAllBtn" style="width:100%;margin-top:6px;font-size:.8rem">🗑️ حذف كل السجلات</button>
       <div class="date-filter"><span>📅 تاريخ السجل</span><label>من <input type="date" id="dateFrom"></label><label>إلى <input type="date" id="dateTo"></label><button class="btn secondary" id="dateClear" title="إلغاء فلتر التاريخ">✕</button></div>
       <div class="search-bar" id="searchBar" hidden><span class="sum" id="searchSum"></span><div class="opts"><label><input type="checkbox" id="scatterChk"> الأرقام متفرقة (أي موقع وأي ترتيب)</label><label><input type="checkbox" id="cropChk" checked> مع صورة السطر</label><label><input type="checkbox" id="approxChk" checked> طباعة القريبة ≈</label></div><button class="btn primary" id="printResultsBtn">🖨️ طباعة النتائج PDF</button></div>
       <div class="records" id="records"></div>
@@ -1031,6 +1032,29 @@ async function exportExcel(){
   finally{btn.textContent=old;btn.disabled=false}
 }
 $('#excelBtn').onclick=exportExcel;
+
+/* ===== حذف كل السجلات دفعة واحدة (مع نسخة احتياطية وتأكيد) ===== */
+$('#deleteAllBtn').onclick=async()=>{
+  await autoSave().catch(()=>{});
+  const all_=(await all()).filter(r=>r.id!==DRAFT_ID);
+  if(!all_.length)return toast('لا توجد سجلات');
+  if(!confirm(`سيتم حذف كل السجلات (${all_.length} سجل) نهائيًا من هذا الجهاز.\n\nهل تريد المتابعة؟`))return;
+  if(confirm('ننصح بتنزيل نسخة احتياطية أولًا حتى تستطيع استرجاعها.\n\nاضغط «موافق» لتنزيل النسخة الآن، أو «إلغاء» للحذف بدونها.')){
+    $('#exportBtn').click();await new Promise(r=>setTimeout(r,1500));
+  }
+  const typed=prompt(`للتأكيد النهائي اكتب كلمة: حذف\n(سيتم حذف ${all_.length} سجل)`);
+  if((typed||'').trim()!=='حذف')return toast('تم الإلغاء — لم يُحذف شيء');
+  const btn=$('#deleteAllBtn');btn.disabled=true;btn.textContent='⏳ جارٍ الحذف…';
+  try{
+    clearTimeout(autoTimer);dirty=false;
+    for(const r of all_)await del(r.id);
+    await del(DRAFT_ID).catch(()=>{});
+    lsSet(LAST_KEY,null);
+    await refresh();newRecord();
+    toast(`✅ تم حذف ${all_.length} سجل`,4000);
+  }catch(e){toast('⚠️ تعذر الحذف: '+e.message,5000);await refresh()}
+  finally{btn.disabled=false;btn.textContent='🗑️ حذف كل السجلات'}
+};
 
 function responseText(data){if(typeof data.output_text==='string')return data.output_text;for(const item of data.output||[])for(const c of item.content||[])if(c.type==='output_text'&&c.text)return c.text;return ''}
 async function compareWithAI(){

@@ -166,8 +166,8 @@
       </div>
       <div class="ai-tools" id="aiTools">
         <label>مفتاح الذكاء الاصطناعي — Gemini مجاني (AIza… أو AQ.…) أو OpenAI (sk-…)<input id="apiKey" type="password" autocomplete="off" placeholder="مفتاح Gemini أو sk-…"><span class="key-remember"><input type="checkbox" id="rememberKey"> تذكّر المفتاح في هذا الجهاز</span></label>
-        <button class="btn primary" id="compareBtn">فحص الاختلافات</button>
-        <div class="ai-note">يُرسل الجدول والصورة للفحص عند ضغط الزر فقط. راجع النتائج لأن قراءة الخط اليدوي قد تخطئ.</div>
+        <button class="btn secondary" id="compareBtn" style="font-size:.75rem;padding:6px 10px">🔎 مقارنة الجدول بالصورة (اختياري)</button>
+        <div class="ai-note">هذا المفتاح يستخدمه زر «✨ استخراج النص من الصورة». زر المقارنة اختياري ولا تحتاجه للاستخراج.</div>
         <div class="ai-results" id="aiResults"></div>
       </div>
       <div class="split">
@@ -1220,15 +1220,15 @@ function updateIndexBtn(){
 const PLATE_PROMPT='هذه صورة محضر جرد سيارات مكتوب بخط اليد فيه جدول مرقّم (م). اقرأ عمود «رقم اللوحة» لكل صف بدقة، حرفًا حرفًا ورقمًا رقمًا، واكتبه كما هو في الصورة (الحروف ثم الأرقام). انتبه للأرقام المتشابهة في الخط اليدوي مثل ٢ و٣، ٧ و٨، ٦ و٤، ٠ و٥، ١ و٩. إذا كان أي رقم أو حرف غير واضح فضع في alternatives كل القراءات المحتملة الأخرى للوحة كاملة. تجاهل الصفوف الفارغة وصفوف (بدون) و(م د م) وعلامات التكرار (//). رقم الصف row هو الرقم في عمود م.';
 /* مفاتيح OpenAI تبدأ بـ sk- ، وأي مفتاح آخر (AIza… أو AQ.… الجديدة) = Google Gemini */
 const isGemini=k=>!/^sk-/.test(String(k).trim());
-const GEMINI_MODELS=['gemini-2.5-flash','gemini-3-flash-preview','gemini-2.0-flash'];let geminiModelIdx=0;
+const GEMINI_MODELS=['gemini-3-flash-preview','gemini-flash-latest','gemini-2.5-flash','gemini-2.0-flash'];let geminiModelIdx=0;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function geminiJSON(key,prompt,imageDataUrl,schema){
-  const m=/^data:([^;]+);base64,(.*)$/.exec(imageDataUrl||'');if(!m)throw new Error('صورة غير صالحة');
+  const imgs=(Array.isArray(imageDataUrl)?imageDataUrl:[imageDataUrl]).map(u=>/^data:([^;]+);base64,(.*)$/.exec(u||'')).filter(Boolean);if(!imgs.length)throw new Error('صورة غير صالحة');
   for(;geminiModelIdx<GEMINI_MODELS.length;geminiModelIdx++){
     const model=GEMINI_MODELS[geminiModelIdx];
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:m[1],data:m[2]}}]}],generationConfig:{temperature:0,responseMimeType:'application/json',responseSchema:schema}})});
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:prompt},...imgs.map(m=>({inline_data:{mime_type:m[1],data:m[2]}}))]}],generationConfig:{temperature:0,maxOutputTokens:32768,responseMimeType:'application/json',responseSchema:schema}})});
     const data=await res.json().catch(()=>({}));
-    if(res.status===404)continue; /* النموذج غير متاح — جرّب التالي */
+    if(res.status===404||(res.status===400&&/not found|not supported|unsupported|model/i.test(data.error?.message||''))||(res.status===403&&/model|permission/i.test(data.error?.message||'')))continue; /* النموذج غير متاح لهذا المفتاح — جرّب التالي */
     if(!res.ok){const e=new Error(data.error?.message||`خطأ ${res.status}`);e.status=res.status;throw e}
     const txt=data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
     return JSON.parse(txt);
@@ -1301,11 +1301,13 @@ function fileToDataURL(file,max=2200,q=.85){
     rd.readAsDataURL(file);
   });
 }
+let ocrSrc=null; /* نسخة عالية الدقة للاستخراج فقط (لا تُحفظ) */
 async function useImageFile(f,{extract}={}){
   if(!f)return;
   try{
     toast('⏳ جارٍ تجهيز الصورة…',2000);
     const data=await fileToDataURL(f);
+    ocrSrc={forImage:data,hi:await fileToDataURL(f,3200,.92).catch(()=>data)};
     recCalib=null;showImage(data);markDirty();setTimeout(()=>autoCalibrate(),50);
     if(extract)extractText();
   }catch(e){toast('⚠️ '+e.message)}
@@ -1327,7 +1329,41 @@ $('#camInput').onchange=e=>useImageFile(e.target.files[0],{extract:true});
 $('#galInput').onchange=e=>useImageFile(e.target.files[0],{extract:true});
 
 /* ===== استخراج النص من الصورة بالذكاء الاصطناعي ===== */
-const OCR_PROMPT='هذه صورة محضر/جدول (غالبًا محضر جرد سيارات مكتوب بخط اليد أو مطبوع). استخرج الجدول كاملًا بدقة عالية:\n- headers: عناوين الأعمدة كما هي مكتوبة في الصورة بالترتيب من اليمين لليسار.\n- rows: كل صف فيه كتابة، خلية خلية بنفس ترتيب العناوين. اكتب النص حرفيًا كما في الصورة (الأرقام الهندية تبقى هندية)، وأبقِ علامات التكرار (// أو ") كما هي، واترك الخلية الفارغة "".\n- تجاهل الصفوف الفارغة تمامًا في آخر الجدول.\n- انتبه للأرقام المتشابهة في الخط اليدوي (٢ و٣، ٧ و٨، ٠ و٥) وحروف اللوحات.\n- title: رقم أو اسم المحضر المكتوب أعلى الصفحة (مثل S1-163) إن وجد، وإلا "".';
+const OCR_PROMPT=`أنت خبير في قراءة المحاضر العربية المكتوبة بخط اليد. أمامك صورة محضر (غالبًا «محضر جرد السيارات التالفة»).
+المطلوب: انسخ الجدول كاملًا بدون أي نقص.
+- headers: عناوين الأعمدة كما هي في الصورة من اليمين لليسار (مثل: م، نوع السيارة، اللون، رقم اللوحة، الحالة).
+- rows: كل صف مرقّم فيه أي كتابة — من أول صف إلى آخر صف مكتوب، بدون تخطي أي صف. كل صف = مصفوفة خلايا بنفس ترتيب العناوين، وأول خلية رقم الصف.
+- اكتب كل خلية حرفيًا كما في الصورة. إذا كانت الكتابة غير واضحة فاكتب أقرب قراءة ممكنة ولا تترك الصف.
+- علامات التكرار (// أو ") اكتبها كما هي. الخلية الفارغة فعلًا = "".
+- الأرقام بالهندية كما في الصورة (٠١٢٣٤٥٦٧٨٩). انتبه للأرقام المتشابهة (٢/٣، ٧/٨، ٠/٥، ٤/٦) ولحروف اللوحات.
+- كل صف يجب أن يحتوي على عدد خلايا يساوي عدد العناوين بالضبط، وكل نص في خانته الصحيحة تحت عنوانه (لا تنقل نص «الحالة» إلى «رقم اللوحة» مثلًا).
+- «بدون لوحات» اكتبها فقط إذا كانت مكتوبة فعلًا في خانة اللوحة لذلك الصف.
+- لا تكتب الصفوف الفارغة تمامًا ولا الخطوط المشطوبة.
+- last_filled_row: رقم آخر صف فيه كتابة في الجدول.
+- title: رقم/اسم المحضر المكتوب أعلى الصفحة (مثل S1-163) إن وجد، وإلا "".
+إذا أُرسلت صورتان: الأولى المحضر كاملًا، والثانية مقطع مكبّر للجدول — اقرأ الخلايا من المقطع المكبّر.`;
+const OCR_SCHEMA_OA={type:'object',additionalProperties:false,properties:{title:{type:'string'},last_filled_row:{type:'integer'},headers:{type:'array',items:{type:'string'}},rows:{type:'array',items:{type:'array',items:{type:'string'}}}},required:['title','last_filled_row','headers','rows']};
+const OCR_SCHEMA_G={type:'OBJECT',properties:{title:{type:'STRING'},last_filled_row:{type:'INTEGER'},headers:{type:'ARRAY',items:{type:'STRING'}},rows:{type:'ARRAY',items:{type:'ARRAY',items:{type:'STRING'}}}},required:['title','last_filled_row','headers','rows']};
+async function aiJSON(key,prompt,images,schemaOA,schemaG,name){
+  if(isGemini(key))return geminiJSON(key,prompt,images,schemaG);
+  const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',store:false,input:[{role:'user',content:[{type:'input_text',text:prompt},...images.map(u=>({type:'input_image',image_url:u,detail:'high'}))]}],text:{format:{type:'json_schema',name,strict:true,schema:schemaOA}},max_output_tokens:12000})});
+  const data=await res.json();if(!res.ok)throw new Error(data.error?.message||`خطأ ${res.status}`);
+  return JSON.parse(responseText(data));
+}
+/* مقطع مكبّر لمنطقة الجدول (من خطوط الجدول المكتشفة) */
+async function tableCrop(src){
+  const im=await loadImg(src);if(!im)return null;
+  let d=null;try{d=detectTableLines(im,0)}catch(e){}
+  if(!d||d.lines.length<3)return null;
+  const L=d.lines,g=(L[L.length-1]-L[0])/(L.length-1);
+  const y0=Math.max(0,L[0]-g*2.2),y1=Math.min(1,L[L.length-1]+g*.4);
+  if(y1-y0>.85)return null; /* الجدول يملأ الصورة أصلًا */
+  const W=im.naturalWidth,H=im.naturalHeight,sh=(y1-y0)*H,sc=Math.min(2,2400/W);
+  const cv=document.createElement('canvas');cv.width=Math.round(W*sc);cv.height=Math.round(sh*sc);
+  const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.drawImage(im,0,y0*H,W,sh,0,0,cv.width,cv.height);
+  return cv.toDataURL('image/jpeg',.92);
+}
+const rowNo=r=>{const v=toLatinNum(String(r?.[0]??'').trim());return /^\d{1,3}$/.test(String(r?.[0]??'').trim().replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)))?+v:null};
 function tableToText(t){
   const clean=v=>String(v??'').replace(/\|/g,'/').replace(/\s+/g,' ').trim();
   const H=(t.headers||[]).map(clean);const w=Math.max(H.length,...(t.rows||[]).map(r=>r.length));
@@ -1342,24 +1378,45 @@ async function extractText(){
   const key=$('#apiKey').value.trim();
   if(!key){toast('أدخل مفتاح OpenAI (sk-…) أو Gemini (AIza…) في المربع الأصفر أولًا',5000);$('#apiKey').scrollIntoView({behavior:'smooth',block:'center'});$('#apiKey').focus();return}
   if($('#sourceText').value.trim()&&!confirm('خانة النص فيها كتابة — استبدالها بالنص المستخرج؟'))return;
-  const btn=$('#extractBtn'),old=btn.textContent;btn.textContent='⏳ جارٍ القراءة… (قد تأخذ 20–40 ثانية)';btn.classList.add('busy');
+  const btn=$('#extractBtn'),old=btn.textContent;btn.textContent='⏳ جارٍ القراءة… (قد تأخذ 30–60 ثانية)';btn.classList.add('busy');
   try{
-    let t;
-    if(isGemini(key)){
-      const gs={type:'OBJECT',properties:{title:{type:'STRING'},headers:{type:'ARRAY',items:{type:'STRING'}},rows:{type:'ARRAY',items:{type:'ARRAY',items:{type:'STRING'}}}},required:['title','headers','rows']};
-      t=await geminiJSON(key,OCR_PROMPT,imageData,gs);
-    }else{
-      const schema={type:'object',additionalProperties:false,properties:{title:{type:'string'},headers:{type:'array',items:{type:'string'}},rows:{type:'array',items:{type:'array',items:{type:'string'}}}},required:['title','headers','rows']};
-      const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',store:false,input:[{role:'user',content:[{type:'input_text',text:OCR_PROMPT},{type:'input_image',image_url:imageData,detail:'high'}]}],text:{format:{type:'json_schema',name:'table_ocr',strict:true,schema}},max_output_tokens:4000})});
-      const data=await res.json();if(!res.ok)throw new Error(data.error?.message||`خطأ ${res.status}`);
-      t=JSON.parse(responseText(data));
+    const src=(ocrSrc&&ocrSrc.forImage===imageData)?ocrSrc.hi:imageData;
+    const crop=await tableCrop(src).catch(()=>null);
+    const images=crop?[src,crop]:[src];
+    let t=await aiJSON(key,OCR_PROMPT,images,OCR_SCHEMA_OA,OCR_SCHEMA_G,'table_ocr');
+    /* فحص النقص: صفوف مرقّمة ناقصة؟ اطلبها مرة ثانية */
+    const got=new Set((t.rows||[]).map(rowNo).filter(n=>n!=null));
+    const last=Math.max(t.last_filled_row||0,...got);
+    const missing=[];for(let i=1;i<=last;i++)if(!got.has(i))missing.push(i);
+    if(got.size&&missing.length&&missing.length<=last){
+      btn.textContent=`⏳ استكمال ${missing.length} صف ناقص…`;
+      try{
+        const t2=await aiJSON(key,OCR_PROMPT+`\n\nمهم: في قراءة سابقة فاتتك هذه الصفوف: ${missing.join('، ')}. أعد في rows هذه الصفوف فقط (بنفس ترتيب الأعمدة: ${(t.headers||[]).join('، ')}).`,images,OCR_SCHEMA_OA,OCR_SCHEMA_G,'table_ocr');
+        const add=(t2.rows||[]).filter(r=>{const n=rowNo(r);return n!=null&&missing.includes(n)});
+        if(add.length){t.rows=[...t.rows,...add].sort((a,b)=>(rowNo(a)??999)-(rowNo(b)??999))}
+      }catch(_){}
     }
     if(!t||!(t.rows||[]).length)throw new Error('لم أجد جدولًا في الصورة — جرّب صورة أوضح ومستقيمة');
+    /* تدقيق ثانٍ مركّز على عمود رقم اللوحة فقط */
+    const W=Math.max((t.headers||[]).length,...t.rows.map(r=>r.length));
+    t.rows=t.rows.map(r=>{const c=[...r];while(c.length<W)c.push('');return c});
+    const pi=(t.headers||[]).findIndex(h=>/لوح/.test(h));
+    let fixedPlates=0;
+    if(pi>=0){
+      btn.textContent='⏳ تدقيق أرقام اللوحات…';
+      try{
+        const pr=await aiJSON(key,PLATE_PROMPT+' إذا أُرسلت صورتان فالثانية مقطع مكبّر للجدول — اقرأ منه. إذا كانت خانة اللوحة مكتوبًا فيها «بدون لوحات» أو «بدون» فاكتبها كما هي في plate.',images,
+          {type:'object',additionalProperties:false,properties:{rows:{type:'array',items:{type:'object',additionalProperties:false,properties:{row:{type:'integer'},plate:{type:'string'},alternatives:{type:'array',items:{type:'string'}}},required:['row','plate','alternatives']}}},required:['rows']},
+          {type:'OBJECT',properties:{rows:{type:'ARRAY',items:{type:'OBJECT',properties:{row:{type:'INTEGER'},plate:{type:'STRING'},alternatives:{type:'ARRAY',items:{type:'STRING'}}},required:['row','plate','alternatives']}}},required:['rows']},'plates');
+        const byRow=new Map((pr.rows||[]).filter(x=>String(x.plate||'').trim()&&!/^[\/"″\s]+$/.test(x.plate)).map(x=>[x.row,x.plate.trim()]));
+        for(const r of t.rows){const n=rowNo(r);const v=n!=null&&byRow.get(n);if(v&&norm(v)!==norm(r[pi])){r[pi]=v;fixedPlates++}}
+      }catch(_){}
+    }
     $('#sourceText').value=tableToText(t);markDirty();
     if(t.title&&!$('#title').value.trim()){$('#title').value=t.title.trim();markDirty()}
     $('#sourceText').scrollIntoView({behavior:'smooth',block:'center'});
     const cb=$('#convertBtn');cb.classList.remove('pulse');void cb.offsetWidth;cb.classList.add('pulse');
-    toast(`✅ تم استخراج ${t.rows.length} صف — راجع النص ثم اضغط «تحويل إلى جدول»`,5000);
+    toast(`✅ تم استخراج ${t.rows.length} صف`+(fixedPlates?` (دُقّقت ${fixedPlates} لوحة)`:'')+' — راجع النص ثم اضغط «تحويل إلى جدول»',5000);
   }catch(e){toast('⚠️ تعذر الاستخراج: '+e.message,6000)}
   finally{btn.textContent=old;btn.classList.remove('busy')}
 }

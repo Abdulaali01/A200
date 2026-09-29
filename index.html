@@ -38,9 +38,9 @@
     .q-info{font-weight:700;color:#4c1d95;font-size:.9rem}.q-info span{font-weight:400;font-size:.8rem;color:#6b5a8e;margin-right:6px}
     .q-btns{display:flex;gap:6px;flex-wrap:wrap}.q-btns [hidden]{display:none!important}.q-btns .btn{padding:7px 10px;font-size:.8rem}
     .q-thumbs{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}.q-thumbs img{height:46px;border-radius:5px;border:2px solid transparent;flex-shrink:0}.q-thumbs img.cur{border-color:#6d28d9}.q-thumbs img.ready{box-shadow:0 0 0 2px #16a34a}
-    .ocr-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.ocr-bar #extractBtn{background:#6d28d9;grid-column:1/-1}.ocr-bar #convertBtn{grid-column:1/-1}.ocr-opt{grid-column:1/-1;display:flex!important;align-items:center;gap:6px;margin:2px 0!important;font-size:.85rem;font-weight:700;color:var(--navy)}.ocr-opt input{width:18px;height:18px}.ocr-bar .btn.busy{opacity:.7;pointer-events:none}#convertBtn.pulse{animation:pulse 1s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px #15734733}}
+    .ocr-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.ocr-bar #extractBtn{background:#6d28d9;grid-column:1/-1}.ocr-bar #convertBtn{grid-column:1/-1}.ocr-opt{grid-column:1/-1;display:flex!important;align-items:center;gap:6px;margin:2px 0!important;font-size:.85rem;font-weight:700;color:var(--navy)}.ocr-opt input{width:18px;height:18px}.ocr-bar .btn.busy{background:#8b5cf6!important}#convertBtn.pulse{animation:pulse 1s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px #15734733}}
     .auto-state{font-size:.8rem;color:var(--muted);margin-right:auto}.auto-state.ok{color:var(--ok)}.auto-state.err{color:var(--danger)}
-    .ai-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px;align-items:end;margin:0 0 12px;padding:10px;border:1px solid #e6c865;background:#fff9db;border-radius:12px}.ai-tools label{margin:0}.ai-tools input{margin-top:5px;background:#fff}#apiKey{display:block;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:400}.key-remember input{width:auto;margin:0}.ai-note{grid-column:1/-1;color:#6f5b13;font-size:.78rem}.ai-results{display:none;grid-column:1/-1;background:#fff;border:1px solid #e6c865;border-radius:9px;padding:9px;line-height:1.7}.ai-results.show{display:block}.ai-results ul{margin:5px 0 0;padding-right:20px}.ai-checking{opacity:.65;pointer-events:none}tbody td.ai-diff{background:#ffe36e!important;box-shadow:inset 0 0 0 3px #d97706}tbody td.ai-low{background:#fff4bd!important;box-shadow:inset 0 0 0 2px #e9b949}
+    .ai-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px;align-items:end;margin:0 0 12px;padding:10px;border:1px solid #e6c865;background:#fff9db;border-radius:12px}.ai-tools label{margin:0}.ai-tools input{margin-top:5px;background:#fff}#apiKey{display:block;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:400}.key-remember input{width:auto;margin:0}.ocr-mode{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.8rem;margin-top:6px}.ocr-mode select{border:1px solid var(--line);border-radius:8px;padding:6px;font:inherit;max-width:100%}.ai-note{grid-column:1/-1;color:#6f5b13;font-size:.78rem}.ai-results{display:none;grid-column:1/-1;background:#fff;border:1px solid #e6c865;border-radius:9px;padding:9px;line-height:1.7}.ai-results.show{display:block}.ai-results ul{margin:5px 0 0;padding-right:20px}.ai-checking{opacity:.65;pointer-events:none}tbody td.ai-diff{background:#ffe36e!important;box-shadow:inset 0 0 0 3px #d97706}tbody td.ai-low{background:#fff4bd!important;box-shadow:inset 0 0 0 2px #e9b949}
     aside{padding:12px;display:flex;flex-direction:column;min-height:0}.aside-title{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px}.aside-title h2{font-size:1rem;margin:0}.count{background:var(--sky);color:var(--navy);border-radius:999px;padding:3px 9px;font-weight:700}
     .backup-bar{display:flex;gap:6px;margin:8px 0 2px}.backup-bar .btn{flex:1;padding:7px 4px;font-size:.78rem}
     .records{overflow:auto;margin-top:8px;display:grid;gap:8px}.record{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;text-align:right}.record:hover{border-color:var(--blue);background:#f6fbfe}.record.current{border-color:var(--ok);background:#effaf3}.record b{display:block}.record .hit{display:block;font-size:.78rem;color:#6b3f00;background:#fff1d6;border:1px solid #f3c77a;border-radius:7px;padding:4px 7px;margin-top:5px;line-height:1.5}.record .hit:hover{background:#ffe2a8}.record .hit.approx{background:#eef4ff;border-color:#9db8e8;color:#1d3b6e}.record .hit.approx em{background:#c9dbff}.record .hit mark{background:#ff9f1c;color:#fff;border-radius:3px;padding:0 1px}.date-filter{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 0;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:#f6fbfe;font-size:.8rem;font-weight:700;color:var(--navy)}.date-filter label{display:flex;align-items:center;gap:4px;margin:0;font-size:.8rem}.date-filter input{border:1px solid var(--line);border-radius:7px;padding:5px;font-size:.8rem;max-width:140px}.date-filter .btn{padding:5px 10px}.date-filter.on{border-color:#157347;background:#effaf3}
@@ -150,7 +150,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-09-29 (5)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-09-30 (8)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -170,7 +170,7 @@
         <input id="galInput" type="file" accept="image/*" multiple class="vh-input"></div>
       </div>
       <div class="ai-tools" id="aiTools">
-        <label>مفتاح الذكاء الاصطناعي — Gemini مجاني (AIza… أو AQ.…) أو OpenAI (sk-…)<input id="apiKey" type="password" autocomplete="off" placeholder="مفتاح Gemini أو sk-…"><span class="key-remember"><input type="checkbox" id="rememberKey"> تذكّر المفتاح في هذا الجهاز</span></label>
+        <label>مفتاح الذكاء الاصطناعي — Gemini مجاني (AIza… أو AQ.…) أو OpenAI (sk-…)<input id="apiKey" type="password" autocomplete="off" placeholder="مفتاح Gemini أو sk-…"><span class="key-remember"><input type="checkbox" id="rememberKey"> تذكّر المفتاح في هذا الجهاز</span><span class="ocr-mode">دقة القراءة (Gemini): <select id="ocrMode"><option value="free">مجاني — Flash</option><option value="pro">أعلى دقة — Pro (يحتاج تفعيل الدفع للمفتاح)</option></select></span></label>
         <button class="btn secondary" id="compareBtn" style="font-size:.75rem;padding:6px 10px">🔎 مقارنة الجدول بالصورة (اختياري)</button>
         <div class="ai-note">هذا المفتاح يستخدمه زر «✨ استخراج النص من الصورة». زر المقارنة اختياري ولا تحتاجه للاستخراج.</div>
         <div class="ai-results" id="aiResults"></div>
@@ -702,8 +702,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('pagehide',()=>autoSave());
 
 function fillForm(r,title){curSig=r.image?{src:r.image,s:r.imgSig}:null;recCalib=r.calib||null;hitRow=-1;setTimeout(()=>{if(!recCalib)autoCalibrate()},50);$('#title').value=title??'';$('#sourceText').value=r.sourceText||'';loadRows(r.rows,r.headers);applyMarks(r.marks);showImage(r.image||'')}
-function newRecord(){queueCur=null;recCalib=null;hitRow=-1;clearTimeout(autoTimer);dirty=false;currentId=null;lsSet(LAST_KEY,null);$('#title').value='';$('#sourceText').value='';loadRows([],DEFAULT_HEADERS);showImage('');$('#deleteBtn').hidden=true;$('#imageInput').value='';setAutoState('');renderRecords();window.scrollTo({top:0,behavior:'smooth'})}
+function newRecord(){if($('#extractBtn').classList.contains('busy')&&ocrCtrl&&!queue.some(q=>q.ctrl===ocrCtrl))ocrCtrl.abort();setExtractBusy(false);queueCur=null;recCalib=null;hitRow=-1;clearTimeout(autoTimer);dirty=false;currentId=null;lsSet(LAST_KEY,null);$('#title').value='';$('#sourceText').value='';loadRows([],DEFAULT_HEADERS);showImage('');$('#deleteBtn').hidden=true;$('#imageInput').value='';setAutoState('');renderRecords();window.scrollTo({top:0,behavior:'smooth'})}
 async function openRecord(id){
+  if($('#extractBtn').classList.contains('busy'))setExtractBusy(false);
   if(dirty)await autoSave();
   const r=records.find(x=>x.id===id);if(!r)return;
   currentId=id;lsSet(LAST_KEY,id);
@@ -1364,8 +1365,8 @@ async function pickForNewPhoto(input){
 }
 $('#camBtn').onclick=()=>pickForNewPhoto($('#camInput'));
 $('#galBtn').onclick=()=>pickForNewPhoto($('#galInput'));
-$('#camInput').onchange=e=>useImageFile(e.target.files[0],{extract:true});
-$('#galInput').onchange=e=>{const fs=[...e.target.files];if(fs.length>1)addToQueue(fs);else useImageFile(fs[0],{extract:true})};
+$('#camInput').onchange=e=>useImageFile(e.target.files[0]);
+$('#galInput').onchange=e=>{const fs=[...e.target.files];if(fs.length>1)addToQueue(fs);else useImageFile(fs[0])};
 
 /* ===== استخراج النص من الصورة بالذكاء الاصطناعي ===== */
 /* ===== استخراج النص — بنفس طريقة تطبيق Gemini: الصورة الأصلية + طلب بسيط + رد كجدول ===== */
@@ -1373,16 +1374,32 @@ const OCR_PROMPT=`استخرج الجدول الموجود في هذه الصو�
 اكتبه كجدول Markdown (أعمدة مفصولة بـ |) بنفس عناوين الأعمدة ونفس ترتيبها من اليمين لليسار، وكل الصفوف المكتوبة من أولها لآخرها.
 انسخ كل خلية حرفيًا كما هي مكتوبة: الأسماء والحروف والأرقام (بالأرقام الهندية كما في الصورة)، وعلامات التكرار (// أو ") كما هي.
 لا تضف أي شرح أو ملاحظات. في السطر الأول فقط اكتب رقم المحضر المكتوب أعلى الصفحة (مثل S1-163) إن وجد، ثم سطرًا فارغًا، ثم الجدول.`;
-const OCR_MODELS=['gemini-3-pro-preview','gemini-2.5-pro','gemini-3-flash-preview','gemini-flash-latest','gemini-2.5-flash','gemini-2.0-flash'];
-const OCR_MODEL_KEY='imageTableEditorOcrModel';
-async function geminiText(key,prompt,images){
+const OCR_FREE=['gemini-flash-latest','gemini-3-flash-preview','gemini-2.5-flash','gemini-2.0-flash'];
+const OCR_PRO=['gemini-3.1-pro-preview','gemini-pro-latest','gemini-3-pro-preview','gemini-2.5-pro'];
+const ocrMode=()=>$('#ocrMode')?.value==='pro'?'pro':'free';
+const OCR_MODEL_KEY_BASE='imageTableEditorOcrModel';
+Object.defineProperty(window,'OCR_MODEL_KEY',{get:()=>OCR_MODEL_KEY_BASE+'_'+ocrMode()});
+Object.defineProperty(window,'OCR_MODELS',{get:()=>ocrMode()==='pro'?[...OCR_PRO,...OCR_FREE]:OCR_FREE});
+/* طلب مع مهلة زمنية + إمكانية الإلغاء */
+const OCR_T={pro:100000,flash:75000};
+async function timedFetch(url,opts,ms,outer){
+  const ctrl=new AbortController();let timedOut=false;
+  const t=setTimeout(()=>{timedOut=true;ctrl.abort()},ms);
+  const onAbort=()=>ctrl.abort();if(outer){if(outer.aborted)ctrl.abort();else outer.addEventListener('abort',onAbort,{once:true})}
+  try{return await fetch(url,{...opts,signal:ctrl.signal})}
+  catch(e){if(outer&&outer.aborted){const x=new Error('تم الإلغاء');x.cancel=true;throw x}if(timedOut){const x=new Error('انتهت المهلة');x.timeout=true;throw x}const x=new Error('تعذر الاتصال — تأكد من الإنترنت');x.net=true;throw x}
+  finally{clearTimeout(t);if(outer)outer.removeEventListener('abort',onAbort)}
+}
+async function geminiText(key,prompt,images,signal){
   const imgs=images.map(u=>/^data:([^;]+);base64,(.*)$/.exec(u||'')).filter(Boolean);if(!imgs.length)throw new Error('صورة غير صالحة');
   const good=lsGet(OCR_MODEL_KEY);
   const order=[...(good?[good]:[]),...OCR_MODELS.filter(m=>m!==good)];
   let lastErr=null;
   for(const model of order){
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},
-      body:JSON.stringify({contents:[{parts:[{text:prompt},...imgs.map(m=>({inline_data:{mime_type:m[1],data:m[2]}}))]}],generationConfig:{temperature:.1,maxOutputTokens:32768}})});
+    let res;
+    try{res=await timedFetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},
+      body:JSON.stringify({contents:[{parts:[{text:prompt},...imgs.map(m=>({inline_data:{mime_type:m[1],data:m[2]}}))]}],generationConfig:{temperature:.1,maxOutputTokens:32768}})},/pro/.test(model)?OCR_T.pro:OCR_T.flash,signal)}
+    catch(e){if(e.cancel||e.net)throw e;lastErr=e;if(lsGet(OCR_MODEL_KEY)===model)lsSet(OCR_MODEL_KEY,null);continue} /* مهلة: جرّب نموذجًا أسرع */
     const data=await res.json().catch(()=>({}));
     if(!res.ok){
       lastErr=new Error(data.error?.message||`خطأ ${res.status}`);lastErr.status=res.status;
@@ -1392,14 +1409,16 @@ async function geminiText(key,prompt,images){
     }
     const txt=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
     if(!txt.trim()){lastErr=new Error('رد فارغ');continue}
-    lsSet(OCR_MODEL_KEY,model);
+    if(ocrMode()!=='pro'||/pro/.test(model))lsSet(OCR_MODEL_KEY,model);
     return{txt,model};
   }
   lsSet(OCR_MODEL_KEY,null);
+  if(lastErr&&lastErr.status===429)throw new Error('انتهى الحد المجاني لمفتاح Gemini مؤقتًا — انتظر دقيقة وحاول، وإذا تكرر فالحد اليومي انتهى ويتجدد غدًا');
+  if(lastErr&&lastErr.timeout)throw new Error('Gemini تأخر كثيرًا في الرد — تأكد من الإنترنت وحاول مرة ثانية');
   throw lastErr||new Error('لا يوجد نموذج Gemini متاح لهذا المفتاح');
 }
-async function openaiText(key,prompt,images){
-  const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',store:false,input:[{role:'user',content:[{type:'input_text',text:prompt},...images.map(u=>({type:'input_image',image_url:u,detail:'high'}))]}],max_output_tokens:12000})});
+async function openaiText(key,prompt,images,signal){
+  const res=await timedFetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',store:false,input:[{role:'user',content:[{type:'input_text',text:prompt},...images.map(u=>({type:'input_image',image_url:u,detail:'high'}))]}],max_output_tokens:12000})},120000,signal);
   const data=await res.json();if(!res.ok)throw new Error(data.error?.message||`خطأ ${res.status}`);
   return{txt:responseText(data),model:'gpt-4o'};
 }
@@ -1437,8 +1456,8 @@ function markDoubts(){
   return n;
 }
 /* قراءة صورة واحدة (قراءتان مستقلتان للمقارنة) — لا تغيّر الصفحة */
-async function ocrCore(src,key){
-  const call=pr=>isGemini(key)?geminiText(key,pr,[src]):openaiText(key,pr,[src]);
+async function ocrCore(src,key,signal){
+  const call=pr=>isGemini(key)?geminiText(key,pr,[src],signal):openaiText(key,pr,[src],signal);
   const [a1,a2]=await Promise.allSettled([call(OCR_PROMPT),call(OCR_PROMPT+'\nاقرأ كل خانة بتأنٍّ حرفًا حرفًا ورقمًا رقمًا قبل كتابتها.')]);
   const ok=[a1,a2].filter(x=>x.status==='fulfilled').map(x=>x.value);
   if(!ok.length)throw (a1.reason||a2.reason);
@@ -1454,6 +1473,8 @@ function applyOcr(r){
   $('#sourceText').scrollIntoView({behavior:'smooth',block:'center'});
   const cb=$('#convertBtn');cb.classList.remove('pulse');void cb.offsetWidth;cb.classList.add('pulse');
   const n=(r.text.match(/^\s*\|/gm)||[]).length-2,nd=r.doubts?.length||0;
+  const proFell=ocrMode()==='pro'&&isGemini($('#apiKey').value.trim())&&!/pro/.test(r.model||'');
+  if(proFell){setTimeout(()=>toast('⚠️ نموذج Pro غير متاح لمفتاحك فتمت القراءة بـ Flash — فعّل الدفع للمفتاح من aistudio.google.com (Set up billing)',8000),7200)}
   toast(`✅ تم الاستخراج (${Math.max(n,0)} صف) بنموذج ${r.model}`+(r.doubts?(nd?` — ${nd} خانة اختلفت فيها القراءتان وستظهر بالأصفر`:' — القراءتان متطابقتان ✔'):'')+' — اضغط «تحويل إلى جدول»',7000);
 }
 function needKey(){
@@ -1461,16 +1482,23 @@ function needKey(){
   if(!key){toast('أدخل مفتاح Gemini أو OpenAI في المربع الأصفر أولًا',5000);$('#apiKey').scrollIntoView({behavior:'smooth',block:'center'});$('#apiKey').focus()}
   return key;
 }
-function setExtractBusy(on){const btn=$('#extractBtn');if(on){btn.dataset.old=btn.dataset.old||btn.textContent;btn.textContent='⏳ جارٍ القراءة… (قد تأخذ 20–60 ثانية)';btn.classList.add('busy')}else{if(btn.dataset.old)btn.textContent=btn.dataset.old;delete btn.dataset.old;btn.classList.remove('busy')}}
+let ocrCtrl=null,busyTimer=null;
+function setExtractBusy(on,ctrl){
+  const btn=$('#extractBtn');clearInterval(busyTimer);
+  if(on){ocrCtrl=ctrl||null;const t0=Date.now();btn.classList.add('busy');
+    const tick=()=>{btn.textContent=`⏳ جارٍ القراءة… ${Math.round((Date.now()-t0)/1000)} ث — اضغط للإلغاء`};tick();busyTimer=setInterval(tick,1000)}
+  else{ocrCtrl=null;btn.textContent='✨ استخراج النص من الصورة';btn.classList.remove('busy')}
+}
 async function extractText(){
+  if($('#extractBtn').classList.contains('busy')){if(ocrCtrl)ocrCtrl.abort();else if(queueCur&&queueCur.ctrl)queueCur.ctrl.abort();setExtractBusy(false);return toast('تم إلغاء القراءة')}
   if(!imageData)return toast('صوّر المحضر أو أرفق صورة أولًا');
   const key=needKey();if(!key)return;
   if($('#sourceText').value.trim()&&!confirm('خانة النص فيها كتابة — استبدالها بالنص المستخرج؟'))return;
-  setExtractBusy(true);
+  const ctrl=new AbortController();setExtractBusy(true,ctrl);
   try{
     const src=(ocrSrc&&ocrSrc.forImage===imageData)?ocrSrc.hi:imageData;
-    applyOcr(await ocrCore(src,key));
-  }catch(e){toast('⚠️ تعذر الاستخراج: '+e.message,7000)}
+    const r=await ocrCore(src,key,ctrl.signal);if(!ctrl.signal.aborted){applyOcr(r);if(queueCur&&ocrSrc&&ocrSrc.hi===queueCur.hi){Object.assign(queueCur,r);saveQueue();renderQueue()}}
+  }catch(e){if(!e.cancel)toast('⚠️ تعذر الاستخراج: '+e.message,7000)}
   finally{setExtractBusy(false)}
 }
 
@@ -1522,7 +1550,7 @@ function renderQueue(){
   const i=queueCur?queue.indexOf(queueCur):-1;
   $('#qPos').textContent=queueCur?`صورة ${i+1} من ${queue.length} في القائمة`:`لديك ${queue.length} صورة في القائمة`;
   const nx=queueCur?queue[i+1]:queue[0];
-  $('#qNext').textContent=nx?(nx.text?'· التالية جاهزة ✓':nx.reading?'· جارٍ قراءة التالية…':''):'· هذه آخر صورة';
+  $('#qNext').textContent=nx?'':'· هذه آخر صورة';
   $('#qStart').hidden=!!queueCur;$('#qSkip').hidden=$('#qDrop').hidden=!queueCur;
   $('#qThumbs').innerHTML=queue.map((it,k)=>`<img src="${it.thumb||it.hi}" class="${it===queueCur?'cur':''} ${it.text?'ready':''}" data-k="${k}" alt="">`).join('');
   $('#qThumbs').querySelectorAll('img').forEach(im=>im.onclick=()=>{const it=queue[+im.dataset.k];if(it!==queueCur)openQueueItem(it)});
@@ -1535,11 +1563,12 @@ function updateSaveLabel(){
 }
 function readQueueItem(it){
   const key=$('#apiKey').value.trim();if(!key||it.text||it.reading)return it.reading||null;
-  it.reading=ocrCore(it.hi,key).then(r=>{Object.assign(it,r);it.reading=null;saveQueue();renderQueue();return r})
-    .catch(e=>{it.reading=null;it.err=e.message;renderQueue();throw e});
+  it.ctrl=new AbortController();
+  it.reading=ocrCore(it.hi,key,it.ctrl.signal).then(r=>{Object.assign(it,r);it.reading=null;it.ctrl=null;saveQueue();renderQueue();return r})
+    .catch(e=>{it.reading=null;it.ctrl=null;it.err=e.message;renderQueue();throw e});
   renderQueue();return it.reading;
 }
-function prefetchNext(){const i=queue.indexOf(queueCur),nx=queue[i+1];if(nx&&!nx.text&&!nx.reading&&!nx.err)readQueueItem(nx).catch(()=>{})}
+function prefetchNext(){return; /* الاستخراج فقط عند ضغط الزر */const i=queue.indexOf(queueCur),nx=queue[i+1];if(nx&&!nx.text&&!nx.reading&&!nx.err)readQueueItem(nx).catch(()=>{})}
 async function openQueueItem(it){
   if(!it)return;
   if(currentId&&dirty)await autoSave();
@@ -1548,12 +1577,13 @@ async function openQueueItem(it){
   if(!it.sig)it.sig=await imgSig(it.hi).catch(()=>null);curSig={src:data,s:it.sig};
   ocrSrc={forImage:data,hi:it.hi};recCalib=null;showImage(data);setTimeout(()=>autoCalibrate(),50);
   renderQueue();window.scrollTo({top:0,behavior:'smooth'});
-  if(it.text){applyOcr(it);prefetchNext();return}
-  if(!$('#apiKey').value.trim()){toast('أدخل المفتاح ثم اضغط «✨ استخراج النص»',5000);return}
-  setExtractBusy(true);
-  try{const r=await (it.reading||readQueueItem(it));if(queueCur===it)applyOcr(r)}
-  catch(e){if(queueCur===it)toast('⚠️ تعذر الاستخراج: '+e.message+' — اضغط «✨ استخراج النص» للمحاولة مرة ثانية',7000);it.err=null}
-  finally{if(queueCur===it)setExtractBusy(false)}
+  if(it.text){applyOcr(it);return}
+  toast('اضغط «✨ استخراج النص من الصورة» لقراءة هذه الصورة',4000);return;
+  const pr=it.reading||readQueueItem(it);
+  setExtractBusy(true,it.ctrl);
+  try{const r=await pr;if(queueCur===it&&r)applyOcr(r)}
+  catch(e){if(queueCur===it&&!e.cancel)toast('⚠️ تعذر الاستخراج: '+e.message+' — اضغط «✨ استخراج النص» للمحاولة مرة ثانية',7000);it.err=null}
+  finally{if(queueCur===it||!queueCur)setExtractBusy(false)}
   prefetchNext();
 }
 async function addToQueue(files){
@@ -1586,6 +1616,7 @@ $('#qSkip').onclick=()=>{const i=queue.indexOf(queueCur);if(queue.length<2)retur
 $('#qDrop').onclick=async()=>{if(!confirm('حذف هذه الصورة من القائمة بدون حفظها كسجل؟'))return;const i=queue.indexOf(queueCur);queue.splice(i,1);queueCur=null;await saveQueue();newRecord();if(queue.length)openQueueItem(queue[Math.min(i,queue.length-1)]);else{renderQueue();toast('انتهت القائمة')}};
 $('#qEnd').onclick=async()=>{if(!confirm(`إنهاء القائمة وحذف ${queue.length} صورة غير محفوظة منها؟ (السجلات المحفوظة لا تتأثر)`))return;queue=[];queueCur=null;await saveQueue();renderQueue();toast('تم إنهاء القائمة')};
 $('#extractBtn').onclick=extractText;
+(function(){const k='imageTableEditorOcrMode',v=lsGet(k);if(v)$('#ocrMode').value=v;$('#ocrMode').onchange=()=>{lsSet(k,$('#ocrMode').value);toast($('#ocrMode').value==='pro'?'تم اختيار Pro — أدق وأبطأ، ويُحسب من رصيد مفتاحك':'تم اختيار Flash المجاني',4000)}})();
 (function(){const k='imageTableEditorSkipNoPlate',v=lsGet(k);if(v!=null)$('#skipNoPlate').checked=v==='1';$('#skipNoPlate').onchange=()=>lsSet(k,$('#skipNoPlate').checked?'1':'0')})();
 $('#convertBtn').onclick=convertText;$('#compareBtn').onclick=compareWithAI;$('#zoomIn').onclick=()=>{zoom=Math.min(3,zoom+.2);applyZoom()};$('#zoomOut').onclick=()=>{zoom=Math.max(.4,zoom-.2);applyZoom()};
 $('#addRow').onclick=()=>{addRow(currentHeaders.map((_,i)=>i===0?String($('#tbody').rows.length+1):''));markDirty()};

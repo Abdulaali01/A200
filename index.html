@@ -150,7 +150,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-01 (11)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-01 (12)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -515,6 +515,8 @@ const CALIB_KEY='imageTableEditorCalib';
 let recCalib=null,hitRow=-1,calibStep=0,calibFirst=0;
 function globalCalib(){try{return JSON.parse(lsGet(CALIB_KEY)||'null')}catch(e){return null}}
 function activeCalib(){return recCalib}
+/* ضبط تلقائي قديم (قبل تصحيح صف العناوين) يُعاد حسابه */
+function staleCalib(c){return !!(c&&c.auto&&c.v!==2)}
 /* موقع الصف من الضبط: خطوط الجدول المكتشفة (دقيق) أو نقطتا الضبط اليدوي */
 /* إزاحة يدوية (▲▼) تنطبق على الصف ومابعده */
 function shiftFor(c,i){let o=0;for(const s of (c?.shifts||[]))if(i>=s.from)o+=s.d;return o}
@@ -599,20 +601,25 @@ function detectTableLines(img,nRows){
   if(!bestChain||bestChain.length<4)return null;
   const rowsFound=bestChain.length-1;
   let L=bestChain;
-  if(nRows&&rowsFound>nRows)L=L.slice(0,nRows+1);
-  return{lines:L.map(v=>v/H),angle:best.a,n:nRows,rowsFound,auto:true};
+  /* صف زائد واحد = صف العناوين فوق الجدول بنفس الارتفاع: نتخطاه حتى يطابق كل صف رقمه */
+  /* إذا ما فيه خط فوق أول السلسلة قريب منها = السلسلة تبدأ من أعلى الجدول فأول صف فيها هو العناوين */
+  const top0=L[0],hdrIn=!merged.some(l=>l<top0-G*.5&&l>top0-G*3.5);
+  if(nRows&&rowsFound>nRows&&hdrIn)L=L.slice(1);
+  if(nRows&&L.length-1>nRows)L=L.slice(0,nRows+1);
+  return{lines:L.map(v=>v/H),angle:best.a,n:nRows,rowsFound:L.length-1,auto:true,v:2};
 }
 const lineCache=new Map();
 async function autoCalibrate(force){
   if(!imageData)return false;
+  if(staleCalib(recCalib)){recCalib=null;force=true}
   if(recCalib&&!force)return true;
-  const key=imageData.length+':'+imageData.slice(-64);
+  const key=imageData.length+':'+imageData.slice(-64)+':'+$('#tbody').rows.length;
   let res=lineCache.get(key);
   if(res===undefined){
     const im=$('#preview');
     if(!im.complete||!im.naturalWidth)await new Promise(r=>im.addEventListener('load',r,{once:true}));
     await new Promise(r=>setTimeout(r,0));
-    try{res=detectTableLines(im,$('#tbody').rows.length)}catch(e){res=null}
+    try{const n=$('#tbody').rows.length;let N=n;for(let i=0;i<n;i++)N=Math.max(N,imgIdx(i)+1);res=detectTableLines(im,N)}catch(e){res=null}
     lineCache.set(key,res);
   }
   if(!res)return false;
@@ -707,7 +714,7 @@ async function autoSave(){
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autoSave()});
 window.addEventListener('pagehide',()=>autoSave());
 
-function fillForm(r,title){rowBase=r.rowBase??baseOfRows(r.rows);curSig=r.image?{src:r.image,s:r.imgSig}:null;recCalib=r.calib||null;hitRow=-1;setTimeout(()=>{if(!recCalib)autoCalibrate()},50);$('#title').value=title??'';$('#sourceText').value=r.sourceText||'';loadRows(r.rows,r.headers);applyMarks(r.marks);showImage(r.image||'')}
+function fillForm(r,title){rowBase=r.rowBase??baseOfRows(r.rows);curSig=r.image?{src:r.image,s:r.imgSig}:null;recCalib=r.calib||null;hitRow=-1;setTimeout(()=>{if(!recCalib||staleCalib(recCalib))autoCalibrate()},50);$('#title').value=title??'';$('#sourceText').value=r.sourceText||'';loadRows(r.rows,r.headers);applyMarks(r.marks);showImage(r.image||'')}
 function newRecord(){rowBase=null;if($('#extractBtn').classList.contains('busy')&&ocrCtrl&&!queue.some(q=>q.ctrl===ocrCtrl))ocrCtrl.abort();setExtractBusy(false);queueCur=null;recCalib=null;hitRow=-1;clearTimeout(autoTimer);dirty=false;currentId=null;lsSet(LAST_KEY,null);$('#title').value='';$('#sourceText').value='';loadRows([],DEFAULT_HEADERS);showImage('');$('#deleteBtn').hidden=true;$('#imageInput').value='';setAutoState('');renderRecords();window.scrollTo({top:0,behavior:'smooth'})}
 async function openRecord(id){
   if($('#extractBtn').classList.contains('busy'))setExtractBusy(false);
@@ -1143,7 +1150,7 @@ function openReview(i){
   closeRowModal?.();
   rvIdx=Math.min(n-1,Math.max(0,i??(focusRowIndex>=0?focusRowIndex:hitRow>=0?hitRow:0)));
   $('#rvImg').src=imageData;$('#rvTitle').textContent=($('#title').value.trim()||'مراجعة الصورة');
-  buildRvList();$('#rv').hidden=false;document.body.classList.add('rv-open');if(!recCalib)autoCalibrate();
+  buildRvList();$('#rv').hidden=false;document.body.classList.add('rv-open');if(!recCalib||staleCalib(recCalib))autoCalibrate();
   try{history.pushState({rv:1},'')}catch(_){}
   setRvMode(rvMode);
 }
@@ -1197,7 +1204,7 @@ function renderStrip(){
   if(!im.complete||!im.naturalWidth){im.addEventListener('load',renderStrip,{once:true});return}
   const b=rowBand(rvIdx),W=im.naturalWidth,H=im.naturalHeight;
   /* الصف وحده يملأ المربع كاملًا: قص الصف فقط (بدون الصفوف المجاورة) */
-  const pad=b.h*.08,top=Math.max(0,b.c-b.h/2-pad),hh=Math.min(1-top,b.h+pad*2);
+  const pad=b.h*.03,top=Math.max(0,b.c-b.h/2-pad),hh=Math.min(1-top,b.h+pad*2);
   const sc=Math.min(1,1600/W),fw=Math.round(W*sc),fh=Math.max(8,Math.round(hh*H*sc));
   const tmp=document.createElement('canvas');tmp.width=fw;tmp.height=fh;const tc=tmp.getContext('2d');
   tc.fillStyle='#fff';tc.fillRect(0,0,fw,fh);
@@ -1209,9 +1216,9 @@ function renderStrip(){
     for(let y=0;y<fh;y++)for(let x=0;x<fw;x++){const i=(y*fw+x)*4;if(d[i]+d[i+1]+d[i+2]<300)cols[x]++}
     const th=Math.max(1,fh*.04);let l=0,r=fw-1;while(l<fw&&cols[l]<th)l++;while(r>l&&cols[r]<th)r--;
     if(r-l>fw*.3){const m=Math.round(fw*.01);x1=Math.max(0,l-m);x2=Math.min(fw,r+1+m)}}catch(e){}
-  /* على الجوال: إذا الصف رفيع نقسمه لسطرين أو ثلاثة داخل المربع (اليمين فوق) حتى يكبر ويبقى كامل */
+  /* صف واحد فقط على عرض المربع كامل */
   const cw=$('#rvStripWrap').clientWidth||innerWidth,rw=x2-x1,fitH=fh*cw/rw;
-  const k=stripZoom>1?1:Math.min(3,Math.max(1,Math.ceil(46/Math.max(fitH,1))));
+  const k=1;
   const ov=k>1?Math.round(rw*.03):0,seg=Math.ceil((rw+ov*(k-1))/k),gap=k>1?Math.max(4,Math.round(fh*.12)):0;
   const cv=$('#rvStrip');cv.width=seg;cv.height=fh*k+gap*(k-1);
   const ctx=cv.getContext('2d');ctx.fillStyle='#f08c00';ctx.fillRect(0,0,cv.width,cv.height);

@@ -150,7 +150,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-01 (12)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (13)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -1204,7 +1204,7 @@ function renderStrip(){
   if(!im.complete||!im.naturalWidth){im.addEventListener('load',renderStrip,{once:true});return}
   const b=rowBand(rvIdx),W=im.naturalWidth,H=im.naturalHeight;
   /* الصف وحده يملأ المربع كاملًا: قص الصف فقط (بدون الصفوف المجاورة) */
-  const pad=b.h*.03,top=Math.max(0,b.c-b.h/2-pad),hh=Math.min(1-top,b.h+pad*2);
+  const pad=0,top=Math.max(0,b.c-b.h/2-pad),hh=Math.min(1-top,b.h+pad*2);
   const sc=Math.min(1,1600/W),fw=Math.round(W*sc),fh=Math.max(8,Math.round(hh*H*sc));
   const tmp=document.createElement('canvas');tmp.width=fw;tmp.height=fh;const tc=tmp.getContext('2d');
   tc.fillStyle='#fff';tc.fillRect(0,0,fw,fh);
@@ -1228,7 +1228,11 @@ function renderStrip(){
 /* تكبير الشريط تلقائيًا حتى يظهر الصف بارتفاع واضح (~64px) مهما كان حجم الجدول */
 function stripEff(){return Math.min(4,Math.max(1,stripZoom))}
 function rvApplyZoom(){
-  $('#rvBox').style.width=(rvZoom*100)+'%';$('#rvStrip').style.width=(stripEff()*100)+'%';
+  $('#rvBox').style.width=(rvZoom*100)+'%';
+  /* المربع بارتفاع كبير ثابت والصف يملأه بالكامل — باقي الأعمدة بالسحب يمين/يسار */
+  const cv=$('#rvStrip'),z=stripEff(),ww=$('#rvStripWrap').clientWidth||innerWidth,ar=cv.width/Math.max(1,cv.height);
+  let sw=Math.min(Math.round(84*z*ar),Math.round(ww*3*z));sw=Math.max(ww,sw);
+  cv.style.width=sw+'px';cv.style.height=Math.round(sw/ar)+'px';
   /* في الصف بصف: أظهر عمودي نوع السيارة ورقم اللوحة (يمين ووسط المحضر) */
   const w=$('#rvStripWrap');requestAnimationFrame(()=>{w.scrollLeft=Math.max(0,w.scrollWidth-w.clientWidth)});
 }
@@ -1261,7 +1265,7 @@ $('#rvType').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault
 $('#rvPlate').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(rvIdx<$('#tbody').rows.length-1){rvSelect(rvIdx+1);$('#rvPlate').focus();$('#rvPlate').select()}else{$('#rvPlate').blur();toast('✅ وصلت لآخر صف')}}});
 /* سحب يمين/يسار على الصورة المقصوصة للتنقل بين الصفوف */
 (function(){let x0=null,y0=null;const w=$('#rvStripWrap');
-  w.addEventListener('touchstart',e=>{if(stripEff()>1)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  w.addEventListener('touchstart',e=>{if(w.scrollWidth>w.clientWidth+2)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
   w.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)rvSelect(rvIdx+(dx>0?1:-1))});
 })();
 /* الضغط على صورة الصف ينقل للصف التالي */

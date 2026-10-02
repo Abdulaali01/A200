@@ -120,6 +120,11 @@
     #rvPlate{font-weight:800;letter-spacing:2px}
     .rv-nav{display:flex;gap:10px}.rv-nav button{flex:1;padding:14px;font-size:1.05rem;border:0;border-radius:10px;font-weight:700;background:#246b94;color:#fff}
     .rv-nav button:disabled{opacity:.35}
+    .rv-nums-title{color:#cfe3ef;font-size:.95rem;font-weight:700;margin-top:4px}
+    .rv-nums{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:8px;padding-bottom:20px}
+    .rv-nums button{padding:12px 0;font-size:1.2rem;font-weight:800;border:2px solid #3d6f8f;border-radius:10px;background:#1d3a4f;color:#fff}
+    .rv-nums button.done{background:#245b3a;border-color:#3f9a63}
+    .rv-nums button.on{background:#f08c00;border-color:#fff;color:#fff;box-shadow:0 0 0 3px rgba(240,140,0,.4)}
     .rv-hint{background:#fff3cd;color:#6b4c00;border-radius:8px;padding:8px;font-size:.85rem}
     .rv-hint[hidden]{display:none}
     .rv-align{display:flex;gap:8px;align-items:center;justify-content:center;font-size:.85rem;color:#cfe3ef;flex-wrap:wrap}.rv-align button{border:0;border-radius:8px;padding:9px 16px;font-weight:700;background:#f08c00;color:#fff;font-size:.95rem}
@@ -151,7 +156,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (18)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (19)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -247,6 +252,8 @@
     <label>نوع السيارة<input id="rvType" autocomplete="off"></label>
     <label>رقم اللوحة<input id="rvPlate" autocomplete="off" enterkeyhint="next"></label>
     <div class="rv-nav"><button id="rvPrev">السابق ▶</button><button id="rvNext">◀ التالي</button></div>
+    <div class="rv-nums-title">اضغط رقم الصف لعرضه وتعديله:</div>
+    <div class="rv-nums" id="rvNums"></div>
   </div>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
@@ -1179,6 +1186,16 @@ function buildRvList(){
 $('#rvList').addEventListener('input',e=>{const t=e.target;if(!t.matches('input'))return;setTbl(+t.dataset.i,+t.dataset.c,t.value);t.classList.add('chg')});
 $('#rvList').addEventListener('focusin',e=>{const t=e.target;if(t.matches('input'))rvSelect(+t.dataset.i)});
 $('#rvList').addEventListener('keydown',e=>{if(e.key!=='Enter'||!e.target.matches('input'))return;e.preventDefault();const all=[...$('#rvList').querySelectorAll('input')],k=all.indexOf(e.target);(all[k+1]||e.target).focus()});
+/* أزرار أرقام الصفوف: الضغط على الرقم يعرض صفه في الصورة ومربعات التعديل */
+function buildRvNums(n){
+  const box=$('#rvNums');
+  if(box.childElementCount!==n||box.dataset.sig!==String(rowNum(0))+':'+rowNum(n-1)){
+    box.innerHTML='';box.dataset.sig=String(rowNum(0))+':'+rowNum(n-1);
+    for(let i=0;i<n;i++){const b=document.createElement('button');b.type='button';b.textContent=rowNum(i);b.dataset.i=i;b.onclick=()=>{rvSelect(i);$('#rvStripWrap').scrollIntoView({block:'nearest',behavior:'smooth'})};box.appendChild(b)}
+  }
+  const{ti,pi}=rvCols();
+  [...box.children].forEach((b,i)=>{b.classList.toggle('on',i===rvIdx);b.classList.toggle('done',i!==rvIdx&&(isChanged(i,ti)||isChanged(i,pi)))});
+}
 function rvSelect(i,noFocus){
   const n=$('#tbody').rows.length;if(!n)return;
   rvIdx=Math.min(n-1,Math.max(0,i));
@@ -1195,6 +1212,7 @@ function rvSelect(i,noFocus){
     $('#rvType').value=v(ti);$('#rvPlate').value=v(pi);
     $('#rvType').classList.toggle('chg',isChanged(rvIdx,ti));$('#rvPlate').classList.toggle('chg',isChanged(rvIdx,pi));
     $('#rvPos').textContent=`صف ${rowNum(rvIdx)} من ${n}`;
+    buildRvNums(n);
     $('#rvPrev').disabled=rvIdx===0;$('#rvNext').disabled=rvIdx===n-1;
     $('#rvHint').hidden=!!activeCalib();
     renderStrip();
@@ -1241,7 +1259,8 @@ function rvApplyZoom(){
   /* المربع بارتفاع الصف — السحب فوق/تحت يحرّك الصورة */
   w.style.height=Math.round(R.h*k)+6+'px';
   /* أظهر الصف الحالي وبداية الجدول من اليمين */
-  requestAnimationFrame(()=>{w.scrollLeft=Math.max(0,w.scrollWidth-w.clientWidth);w.scrollTop=Math.round(R.y*k)});
+  const al=()=>{w.scrollLeft=Math.max(0,w.scrollWidth-w.clientWidth);w.scrollTop=Math.round(R.y*k)};
+  requestAnimationFrame(al);setTimeout(al,120);setTimeout(al,400);
 }
 document.querySelectorAll('.rv-modes button').forEach(b=>b.onclick=()=>setRvMode(b.dataset.mode));
 $('#rvZoomIn').onclick=()=>{if(rvMode==='row'){stripZoom=Math.min(4,+(stripZoom*1.25).toFixed(3));lsSet('imageTableEditorStripFit',stripZoom)}else rvZoom=Math.min(4,rvZoom+.25);rvApplyZoom();if(rvMode==='side')rvSelect(rvIdx,true)};
@@ -1270,30 +1289,11 @@ $('#rvType').addEventListener('input',()=>{setTbl(rvIdx,rvCols().ti,$('#rvType')
 $('#rvPlate').addEventListener('input',()=>{setTbl(rvIdx,rvCols().pi,$('#rvPlate').value);$('#rvPlate').classList.add('chg')});
 $('#rvType').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#rvPlate').focus()}});
 $('#rvPlate').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(rvIdx<$('#tbody').rows.length-1){rvSelect(rvIdx+1);$('#rvPlate').focus();$('#rvPlate').select()}else{$('#rvPlate').blur();toast('✅ وصلت لآخر صف')}}});
-/* سحب يمين/يسار على الصورة المقصوصة للتنقل بين الصفوف */
-(function(){let x0=null,y0=null;const w=$('#rvStripWrap');
-  w.addEventListener('touchstart',e=>{if(w.scrollWidth>w.clientWidth+2)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
-  w.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)rvSelect(rvIdx+(dx>0?1:-1))});
-})();
+/* السحب على الصورة يحركها فقط ولا يغيّر الصف */
 /* الضغط على صورة الصف ينقل للصف التالي */
 /* الضغط على أي صف في الصورة يعرض بياناته في المربعات تحت للتعديل */
-$('#rvStripWrap').addEventListener('click',e=>{
-  if(rvMode!=='row')return;
-  const cv=$('#rvStrip'),R=stripRow,r=cv.getBoundingClientRect(),w=$('#rvStripWrap'),n=$('#tbody').rows.length;
-  if(R&&R.ppu&&r.height){
-    const cy=(e.clientY-r.top)*cv.height/r.height;
-    if(cy<R.y||cy>R.y+R.h){
-      /* صف ثاني: نحدده من حدود الصفوف المكتشفة (كل صف بارتفاعه الحقيقي) */
-      const yImg=R.top+cy/R.ppu;let hit=-1,best=1e9;
-      for(let i=0;i<n;i++){const b=rowBand(i),t=b.c-b.h/2;if(yImg>=t&&yImg<t+b.h){hit=i;break}const d=Math.abs(yImg-b.c);if(d<best&&d<b.h*.75){best=d;hit=i}}
-      if(hit<0)return toast('هذا السطر غير موجود في الجدول');
-      if(hit!==rvIdx){rvSelect(hit);return toast('صف '+rowNum(hit))}
-    }
-    /* نفس الصف: إذا كانت الصورة محرّكة نرجعها عليه، وإلا ننتقل للتالي */
-    const kk=cv.width?r.width/cv.width:1;if(Math.abs(w.scrollTop-R.y*kk)>4){rvSelect(rvIdx,true);return}
-  }
-  if(rvIdx<n-1)rvSelect(rvIdx+1);else toast('✅ وصلت لآخر صف');
-});
+/* الضغط على الصورة يرجعها على الصف الحالي فقط (التنقل بالأرقام أو التالي/السابق) */
+$('#rvStripWrap').addEventListener('click',()=>{if(rvMode==='row')rvApplyZoom()});
 $('#reviewBtn').onclick=()=>openReview();
 
 /* ===== قراءة الصور للبحث (فهرسة) ===== */

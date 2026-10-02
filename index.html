@@ -150,7 +150,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (14)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (15)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -1222,7 +1222,7 @@ function renderStrip(){
   /* خط برتقالي خفيف عند حدود الصف الحالي */
   ctx.strokeStyle='rgba(240,140,0,.9)';ctx.lineWidth=Math.max(2,rh*.04);ctx.setLineDash([12,8]);
   ctx.beginPath();ctx.moveTo(0,ry);ctx.lineTo(cv.width,ry);ctx.moveTo(0,ry+rh);ctx.lineTo(cv.width,ry+rh);ctx.stroke();
-  stripRow={y:ry,h:rh};
+  stripRow={y:ry,h:rh,top,ppu:H*sc};
   rvApplyZoom();
 }
 let stripRow=null;
@@ -1274,7 +1274,21 @@ $('#rvPlate').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefaul
   w.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)rvSelect(rvIdx+(dx>0?1:-1))});
 })();
 /* الضغط على صورة الصف ينقل للصف التالي */
-$('#rvStripWrap').addEventListener('click',()=>{if(rvMode!=='row')return;if(rvIdx<$('#tbody').rows.length-1)rvSelect(rvIdx+1);else toast('✅ وصلت لآخر صف')});
+/* الضغط على أي صف في الصورة يعرض بياناته في المربعات تحت للتعديل */
+$('#rvStripWrap').addEventListener('click',e=>{
+  if(rvMode!=='row')return;
+  const cv=$('#rvStrip'),R=stripRow,r=cv.getBoundingClientRect(),w=$('#rvStripWrap');
+  if(R&&R.ppu&&r.height){
+    const cy=(e.clientY-r.top)*cv.height/r.height,yImg=R.top+cy/R.ppu,n=$('#tbody').rows.length;
+    let hit=-1,best=1e9;
+    for(let i=0;i<n;i++){const b=rowBand(i),t=b.c-b.h/2;if(yImg>=t&&yImg<t+b.h){hit=i;break}const d=Math.abs(yImg-b.c);if(d<best&&d<b.h){best=d;hit=i}}
+    if(hit>=0&&hit!==rvIdx){rvSelect(hit);toast('صف '+rowNum(hit));return}
+    if(hit<0){toast('هذا السطر غير موجود في الجدول');return}
+    /* نفس الصف: إذا كانت الصورة محرّكة نرجعها عليه، وإلا ننتقل للتالي */
+    const k=cv.width?r.width/cv.width:1;if(Math.abs(w.scrollTop-R.y*k)>4){rvSelect(rvIdx,true);return}
+  }
+  if(rvIdx<$('#tbody').rows.length-1)rvSelect(rvIdx+1);else toast('✅ وصلت لآخر صف');
+});
 $('#reviewBtn').onclick=()=>openReview();
 
 /* ===== قراءة الصور للبحث (فهرسة) ===== */

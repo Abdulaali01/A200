@@ -113,10 +113,11 @@
     .rv-row{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:12px;direction:rtl}
     .rv-strip{overflow:auto;max-width:100%;min-width:0;box-sizing:border-box;cursor:pointer;background:#fff;border-radius:10px;border:3px solid #f08c00;flex-shrink:0;direction:ltr}
     #rvStrip{display:block;width:100%}
-    .rv-row label{color:#fff;font-weight:700;margin:0}
-    .rv-row input{display:block;width:100%;font-size:1.25rem;padding:12px;border-radius:10px;border:3px solid transparent;text-align:center;margin-top:5px;background:#fff;color:#17212b}
+    .rv-row label{color:#fff;font-weight:700;margin:0;font-size:clamp(1.1rem,4.6vw,1.5rem)}
+    .rv-row input{display:block;width:100%;box-sizing:border-box;font-size:clamp(1.7rem,8vw,2.6rem);line-height:1.25;font-weight:700;padding:16px 10px;border-radius:12px;border:3px solid #9fc3d8;text-align:center;margin-top:6px;background:#fff;color:#0b1620}
+    .rv-row input:focus{outline:none;border-color:#f08c00;box-shadow:0 0 0 3px rgba(240,140,0,.35)}
     .rv-row input.chg{background:#fff0a8;border-color:#e6a700}
-    #rvPlate{font-weight:700;letter-spacing:1px}
+    #rvPlate{font-weight:800;letter-spacing:2px}
     .rv-nav{display:flex;gap:10px}.rv-nav button{flex:1;padding:14px;font-size:1.05rem;border:0;border-radius:10px;font-weight:700;background:#246b94;color:#fff}
     .rv-nav button:disabled{opacity:.35}
     .rv-hint{background:#fff3cd;color:#6b4c00;border-radius:8px;padding:8px;font-size:.85rem}
@@ -150,7 +151,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (17)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (18)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>

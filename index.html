@@ -150,7 +150,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (16)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (17)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -516,7 +516,7 @@ let recCalib=null,hitRow=-1,calibStep=0,calibFirst=0;
 function globalCalib(){try{return JSON.parse(lsGet(CALIB_KEY)||'null')}catch(e){return null}}
 function activeCalib(){return recCalib}
 /* ضبط تلقائي قديم (قبل تصحيح صف العناوين) يُعاد حسابه */
-function staleCalib(c){return !!(c&&c.auto&&c.v!==2)}
+function staleCalib(c){return !!(c&&c.auto&&c.v!==3)}
 /* موقع الصف من الضبط: خطوط الجدول المكتشفة (دقيق) أو نقطتا الضبط اليدوي */
 /* إزاحة يدوية (▲▼) تنطبق على الصف ومابعده */
 function shiftFor(c,i){let o=0;for(const s of (c?.shifts||[]))if(i>=s.from)o+=s.d;return o}
@@ -606,7 +606,7 @@ function detectTableLines(img,nRows){
   const top0=L[0],hdrIn=!merged.some(l=>l<top0-G*.5&&l>top0-G*3.5);
   if(nRows&&rowsFound>nRows&&hdrIn)L=L.slice(1);
   if(nRows&&L.length-1>nRows)L=L.slice(0,nRows+1);
-  return{lines:L.map(v=>v/H),angle:best.a,n:nRows,rowsFound:L.length-1,auto:true,v:2};
+  return{lines:L.map(v=>v/H),angle:best.a,n:nRows,rowsFound:L.length-1,auto:true,v:3};
 }
 const lineCache=new Map();
 async function autoCalibrate(force){
@@ -1219,17 +1219,7 @@ function renderStrip(){
     if(r-l>fw*.3){const m=Math.round(fw*.01);x1=Math.max(0,l-m);x2=Math.min(fw,r+1+m)}}catch(e){}
   const cv=$('#rvStrip');cv.width=x2-x1;cv.height=fh;
   const ctx=cv.getContext('2d',{willReadFrequently:true});ctx.drawImage(tmp,x1,0,x2-x1,fh,0,0,x2-x1,fh);
-  /* قراءة خطوط الجدول الحقيقية داخل الصورة المقصوصة — حتى يطابق المربع والضغط ما تشوفه */
-  let lines=[];
-  try{const cw2=cv.width,d=ctx.getImageData(0,0,cw2,fh).data,prof=[];
-    for(let y=0;y<fh;y++){let c=0;for(let x=0;x<cw2;x+=2){const i=(y*cw2+x)*4;if(d[i]+d[i+1]+d[i+2]<360)c++}prof.push(c/Math.ceil(cw2/2))}
-    let y=0;while(y<fh){if(prof[y]>=.35){let w=0,m=0;while(y<fh&&prof[y]>=.35){w+=prof[y];m+=prof[y]*y;y++}lines.push(m/w)}else y++}
-    const mg=[];for(const l of lines){if(mg.length&&l-mg[mg.length-1]<rh*.3)mg[mg.length-1]=(mg[mg.length-1]+l)/2;else mg.push(l)}lines=mg;
-    const near=t=>{let b=null;for(const l of lines)if(Math.abs(l-t)<rh*.5&&(b==null||Math.abs(l-t)<Math.abs(b-t)))b=l;return b};
-    const t1=near(ry),t2=near(ry+rh);
-    if(t1!=null&&t2!=null&&t2-t1>rh*.5){ry=Math.round(t1);rh=Math.round(t2-t1)}
-    else if(t1!=null){ry=Math.round(t1)}else if(t2!=null){ry=Math.round(t2-rh)}
-  }catch(e){lines=[]}
+  const lines=[];
   /* خط برتقالي خفيف عند حدود الصف الحالي */
   ctx.strokeStyle='rgba(240,140,0,.9)';ctx.lineWidth=Math.max(2,rh*.04);ctx.setLineDash([12,8]);
   ctx.beginPath();ctx.moveTo(0,ry);ctx.lineTo(cv.width,ry);ctx.moveTo(0,ry+rh);ctx.lineTo(cv.width,ry+rh);ctx.stroke();
@@ -1289,17 +1279,14 @@ $('#rvPlate').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefaul
 $('#rvStripWrap').addEventListener('click',e=>{
   if(rvMode!=='row')return;
   const cv=$('#rvStrip'),R=stripRow,r=cv.getBoundingClientRect(),w=$('#rvStripWrap'),n=$('#tbody').rows.length;
-  if(R&&r.height){
-    const cy=(e.clientY-r.top)*cv.height/r.height,c0=R.y+R.h/2;
-    /* كم خط جدول بين الصف الحالي ومكان الضغط = كم صف نتحرك */
-    let k;const L=(R.lines||[]).filter(l=>l<R.y-2||l>R.y+R.h+2||Math.abs(l-R.y)<=2||Math.abs(l-R.y-R.h)<=2);
-    if(cy>=R.y&&cy<=R.y+R.h)k=0;
-    else if(L.length>=2){k=cy>c0?L.filter(l=>l>c0&&l<cy).length:-L.filter(l=>l<c0&&l>cy).length}
-    else k=Math.floor((cy-R.y)/R.h);
-    if(k!==0){
-      const tgt=imgIdx(rvIdx)+k;let hit=-1;for(let i=0;i<n;i++)if(imgIdx(i)===tgt){hit=i;break}
+  if(R&&R.ppu&&r.height){
+    const cy=(e.clientY-r.top)*cv.height/r.height;
+    if(cy<R.y||cy>R.y+R.h){
+      /* صف ثاني: نحدده من حدود الصفوف المكتشفة (كل صف بارتفاعه الحقيقي) */
+      const yImg=R.top+cy/R.ppu;let hit=-1,best=1e9;
+      for(let i=0;i<n;i++){const b=rowBand(i),t=b.c-b.h/2;if(yImg>=t&&yImg<t+b.h){hit=i;break}const d=Math.abs(yImg-b.c);if(d<best&&d<b.h*.75){best=d;hit=i}}
       if(hit<0)return toast('هذا السطر غير موجود في الجدول');
-      rvSelect(hit);return toast('صف '+rowNum(hit));
+      if(hit!==rvIdx){rvSelect(hit);return toast('صف '+rowNum(hit))}
     }
     /* نفس الصف: إذا كانت الصورة محرّكة نرجعها عليه، وإلا ننتقل للتالي */
     const kk=cv.width?r.width/cv.width:1;if(Math.abs(w.scrollTop-R.y*kk)>4){rvSelect(rvIdx,true);return}

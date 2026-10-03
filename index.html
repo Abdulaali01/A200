@@ -156,7 +156,7 @@
 <div id="bootErr" hidden style="position:sticky;top:0;z-index:9999;background:#b42318;color:#fff;padding:12px 14px;font-weight:700;line-height:1.6"></div>
 <div class="app">
   <header>
-    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-02 (19)</small></h1>
+    <h1>محرر الجداول مع الصور <small style="font-size:.6rem;opacity:.6;font-weight:400">v2026-10-03 (20)</small></h1>
     <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
     <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
     <button class="btn secondary" id="newBtn">سجل جديد</button>
@@ -352,8 +352,33 @@ function splitCells(line){
 }
 const isSepRow=r=>r.some(x=>/-{2,}/.test(x))&&r.every(x=>x===''||/^:?-{2,}:?$/.test(x));
 const isEmptyRow=r=>!r.some(Boolean);
+/* إذا انلصقت كل الصفوف في سطر واحد طويل: نفصلها من جديد على أرقام الصفوف المتتالية (1، 2، 3…) */
+function unflattenRows(text){
+  const ls=text.split(/\r?\n/);
+  const cellCount=l=>(l.match(/\|/g)||[]).length;
+  if(!ls.some(l=>cellCount(l)>=16))return text;
+  const toN=v=>{const m=String(v).trim();if(!/^[0-9٠-٩۰-۹]{1,3}$/.test(m))return null;return +m.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))};
+  const cells=ls.join(' | ').split('|').map(v=>v.trim()).filter(v=>v!==''&&!/^:?-{3,}:?$/.test(v));
+  /* أول رقم صف: أول خلية رقمية بعد العناوين يليها نص */
+  let st=cells.findIndex((v,i)=>toN(v)!=null&&i+1<cells.length&&toN(cells[i+1])==null);
+  if(st<0)return text;
+  const head=cells.slice(0,st),rows=[];let cur=[],next=toN(cells[st]);
+  for(let i=st;i<cells.length;i++){
+    const v=cells[i],n=toN(v);
+    if(n!=null&&n===next&&(cur.length===0||cur.length>=3)){if(cur.length)rows.push(cur);cur=[v];next=n+1}
+    else cur.push(v);
+  }
+  if(cur.length)rows.push(cur);
+  if(rows.length<2)return text;
+  /* إزالة "—" الزائدة في آخر الصف إذا كانت تعني خلية فاضية */
+  const out=[];
+  if(head.length>=2)out.push('| '+head.join(' | ')+' |','|'+head.map(()=>'---').join('|')+'|');
+  rows.forEach(r=>out.push('| '+r.join(' | ')+' |'));
+  return out.join('\n');
+}
 function parseTable(text){
   text=text.replace(/[│｜¦┃]/g,'|');
+  text=unflattenRows(text);
   const lines=text.split(/\r?\n/).map(x=>x.trim());
   let rows=[];
   const pipeLines=lines.filter(l=>l.includes('|'));
